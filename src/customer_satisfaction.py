@@ -38,8 +38,8 @@ def normalise(data):
   
 def build_model(data):
     model = Sequential()
-    model.add(Dense(120,input_dim = data.shape[1], kernel_initializer='uniform', activation = 'tanh'))
-    model.add(Dense(1,input_dim = 120, kernel_initializer='uniform', activation = 'sigmoid'))
+    model.add(Dense(219,input_dim = data.shape[1], kernel_initializer='uniform', activation = 'tanh'))
+    model.add(Dense(1,input_dim = 219, kernel_initializer='uniform', activation = 'sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='adam')   
     return model
 
