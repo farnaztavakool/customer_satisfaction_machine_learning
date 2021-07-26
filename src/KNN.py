@@ -1,5 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
-from customer_satisfaction import preprocessData
+from customer_satisfaction import preprocessData, loadData
+from sklearn.metrics import log_loss
 
 def train_NN_model():
     df_train = loadData("train.csv")
@@ -27,5 +28,5 @@ def train_NN_model():
     knn.fit(X_train, Y_train)
 
     loss = log_loss(Y_test, knn.predict_proba(X_test))
-    # print(pd.DataFrame({'ID':ID_test, "Target": prediction}))
+    #print(pd.DataFrame({'ID':ID_test, "Target": prediction}))
     print('loss: ', loss)
