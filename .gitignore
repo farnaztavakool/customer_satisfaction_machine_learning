@@ -6,3 +6,5 @@ src/X_test.csv
 src/X_train.csv
 src/Y_train.csv
 src/submission.csv
+src/submission_*.csv
+src/model_*.joblib
