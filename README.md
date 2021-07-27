@@ -7,6 +7,8 @@
 <img width="568" alt="image" src="https://user-images.githubusercontent.com/60339514/126883739-089cd32e-9daf-4b0f-a00e-6e1fcb2a5e41.png">
 
 
+## data analysis:
+
 ## data preprocess:
     I separate the data preprocess so that we don't need to preprocess data every time we train our model. However, the output of the csv files are too large
     to push to github repo. So just run data_preprocess.py and it will export the training and test set. I also added these csv files into .gitignore so that 
