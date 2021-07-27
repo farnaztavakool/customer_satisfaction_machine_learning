@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.feature_selection import SelectKBest, f_classif, RFE
+from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, VarianceThreshold
 from sklearn.tree import DecisionTreeClassifier
 from feature_engine.selection import DropCorrelatedFeatures
+from keras.models import Sequential
+from keras.layers import Dense
 
 def loadData(path):
     df= pd.read_csv(path)
@@ -35,6 +36,11 @@ def featureSelectionRFE(train_X, train_Y, test, numOfFeatures, estimator):
     rfe = RFE(estimator = estimator, n_features_to_select=numOfFeatures)
     rfe.fit(train_X, train_Y)
     return [pd.DataFrame(rfe.transform(train_X)),pd.DataFrame(rfe.transform(test))]
+
+def featureSelectionCHI2(train_X, train_Y, test, numOfFeatures):
+    new_best = SelectKBest(chi2, k=numOfFeatures)
+    new_best.fit(train_X, train_Y)
+    return [pd.DataFrame(new_best.transform(train_X)),pd.DataFrame(new_best.transform(test))]
 
 def dropColumnWithName(data, name):
     column_to_drop = [c for c in data if c.startswith(name)]
