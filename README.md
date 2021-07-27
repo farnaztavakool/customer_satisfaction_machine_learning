@@ -1,6 +1,6 @@
 # customer_satisfaction_machine_learning
 ## How to run 
-1)you can install the dependencies with pip3 install -r requiremeent.txt
+1)you can install the dependencies with pip3 install -r requirements.txt
 2) you can run the python code with python3
 
 ## current outuput
@@ -14,7 +14,7 @@
             it might be an irrelavant feature and so we drop it.
             However, pearson correlation is only sensitive to linear relationship, it the feature has non-linear relationship with the target, it might have
             low pearson correlation so might be classified as irrelavant feature.
-        2.Chi-square:
+        2.Chi-square (done by John):
             chi-square is similar to pearson correlation, but this is for categorical data so it should not be suitable for our dataset.
         3.Variance (also already done by Farnaz):
 
