@@ -1,10 +1,10 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 #from sklearn.externals import joblib
 import joblib
 from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
+import customer_satisfaction as cs
 
 def find_best_k_value():
     '''
@@ -19,9 +19,9 @@ def find_best_k_value():
 
     df_train_x, y_train, df_test = preprocessData(df_train, df_test)
     '''
-    df_train_x = loadData('X_train.csv')
+    df_train_x = cs.loadData('X_train.csv')
     y_train = np.ravel(loadData('Y_train.csv'))
-    df_test = loadData('X_test.csv')
+    df_test = cs.loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
@@ -48,21 +48,16 @@ def find_best_k_value():
     plt.xlabel('number of neighbors')
     plt.ylabel('Loss')
     plt.show()
-    
-    
-def loadData(path):
-    df= pd.read_csv(path)
-    return pd.DataFrame(df)
 
 def train_KNN_model():
-    df_train_x = loadData('X_train.csv')
-    y_train = np.ravel(loadData('Y_train.csv'))
-    df_test = loadData('X_test.csv')
+    df_train_x = cs.loadData('X_train.csv')
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
+    df_test = cs.loadData('X_test.csv')
     
     knn = KNeighborsClassifier(n_neighbors=5)
     knn.fit(df_train_x, y_train)
     
-    submission = loadData('sample_submission.csv')
+    submission = cs.loadData('sample_submission.csv')
     target = knn.predict_proba(df_test)
     submission['TARGET'] = target[:,1]
     submission.to_csv('submission_KNN.csv', index=False)
@@ -71,9 +66,9 @@ def train_KNN_model():
     joblib.dump(knn, 'model_KNN.joblib')
     
 def test_KNN_model():
-    df_train_x = loadData('X_train.csv')
-    y_train = np.ravel(loadData('Y_train.csv'))
-    df_test = loadData('X_test.csv')
+    df_train_x = cs.loadData('X_train.csv')
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
+    df_test = cs.loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
