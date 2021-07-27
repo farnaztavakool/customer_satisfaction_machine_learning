@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
 
-def train_NN_model():
+def find_best_k_value():
     '''
     df_train = loadData("train.csv")
     df_test = loadData("test.csv")
@@ -52,4 +52,40 @@ def loadData(path):
     df= pd.read_csv(path)
     return pd.DataFrame(df)
 
-train_NN_model()
+def train_KNN_model():
+    df_train_x = loadData('X_train.csv')
+    y_train = np.ravel(loadData('Y_train.csv'))
+    df_test = loadData('X_test.csv')
+    
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(df_train_x, y_train)
+    
+    submission = loadData('sample_submission.csv')
+    target = knn.predict(df_test)
+    submission['TARGET'] = target
+    submission.to_csv('submission.csv', index=False)
+    
+def test_KNN_model():
+    df_train_x = loadData('X_train.csv')
+    y_train = np.ravel(loadData('Y_train.csv'))
+    df_test = loadData('X_test.csv')
+    
+    # split train data into two separate sets
+    # one for training and the other one for testing
+    X_train = df_train_x[0 : 10000]
+    Y_train = y_train[0 : 10000]
+    X_test = df_train_x[10000 : 15000]
+    Y_test = y_train[10000 : 15000]
+    
+    knn = KNeighborsClassifier(n_neighbors=400)
+    knn.fit(X_train, Y_train)
+    predict = knn.predict_proba(X_test)
+    loss = log_loss(Y_test, predict)
+    score = knn.score(X_test, Y_test)
+    print(predict[:,1])
+    print('loss: ', loss)
+    print('score: ',score)
+    
+    
+    
+train_KNN_model()
