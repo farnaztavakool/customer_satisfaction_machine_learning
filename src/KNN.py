@@ -1,5 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
 from customer_satisfaction import preprocessData
+from sklearn.metrics import log_loss
 
 def train_NN_model():
     df_train = loadData("train.csv")
