@@ -15,13 +15,18 @@ def essemble_model():
     knn = joblib.load('model_KNN.joblib')
     decisionTree = joblib.load('model_decisionTree.joblib')
     
-    knn_prediction = knn.predict_proba(df_test)
-    decisionTree_prediction = decisionTree.predict_proba(df_test)
     
-    final_prediction = 0.5 * knn_prediction + 0.5 * decisionTree_prediction
+    decisionTree_prediction = decisionTree.predict_proba(df_test)[:,1]
+    knn_prediction = knn.predict_proba(df_test)[:,1]
+    
+    
+    nn_prediction = np.array(loadData('nn_output.csv'))
+    nn_prediction = nn_prediction[:,1]
+    
+    final_prediction = knn_prediction/3 + decisionTree_prediction/3 + nn_prediction/3
     
     submission = loadData('sample_submission.csv')
-    submission['TARGET'] = final_prediction[:,1]
+    submission['TARGET'] = final_prediction
     submission.to_csv('submission_essemble.csv', index=False)
     
 essemble_model()

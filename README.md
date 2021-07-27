@@ -52,3 +52,7 @@
 
 ## A combination of KNN and decision Tree model:
     Score for submission: 0.749
+
+
+## A combination of KNN, decision Tree and neural network model:
+    Score for submission: 0.786
