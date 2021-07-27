@@ -37,4 +37,7 @@
 
 
 ## KNN model:
-    The training for KNN model is really slow, have no idead why
+    The training for KNN model is really slow, have no idead why.
+
+    Since the data is highly unbalance (around 96% of the target is 0 and 4% of the target is 1). If we use a large k value for our KNN model, every sample will be predicted as 0 since 
+    we have a really large propotion of 0s. And also this will not decrease our accuracy since even though we output every target as 0, we will still get a high accuracy around 96%.
