@@ -4,6 +4,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, VarianceThreshold
 from sklearn.tree import DecisionTreeClassifier
 from feature_engine.selection import DropCorrelatedFeatures
+from keras.models import Sequential
+from keras.layers import Dense
 
 def loadData(path):
     df= pd.read_csv(path)
@@ -48,6 +50,15 @@ def normalise(data):
     scaler = StandardScaler()
     return pd.DataFrame(scaler.fit_transform(data))
 
+  
+def build_model(data):
+    model = Sequential()
+    model.add(Dense(219,input_dim = data.shape[1], kernel_initializer='uniform', activation = 'tanh'))
+    model.add(Dense(1,input_dim = 219, kernel_initializer='uniform', activation = 'sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam')   
+    return model
+
+
 
 def preprocessData(df_train, df_test):
 
@@ -80,6 +91,3 @@ def preprocessData(df_train, df_test):
     df_test = normalise(df_test)
 
     return [df_train_x, y_train, df_test]
-
-
-
