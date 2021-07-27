@@ -1,15 +1,11 @@
-import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, VarianceThreshold
 from sklearn.tree import DecisionTreeClassifier
 from feature_engine.selection import DropCorrelatedFeatures
-from keras.models import Sequential
-from keras.layers import Dense
 
 def loadData(path):
-    df= pd.read_csv(path)
-    return pd.DataFrame(df)
+    return pd.DataFrame(pd.read_csv(path))
 
 def dropDuplicatedRowAndColumn(train, test):   
     train = train.drop_duplicates()
