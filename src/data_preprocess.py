@@ -1,5 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier
 import customer_satisfaction as cs
+import pandas as pd
+from sklearn.utils import resample
 
 def preprocessData(df_train, df_test):
 
@@ -37,6 +39,30 @@ def preprocessData(df_train, df_test):
 
     return [df_train_x, y_train, df_test]
 
+
+def oversampling_dataset(data):
+    count_majority, count_minority = data['TARGET'].value_counts()
+    
+    data_majority=data[data.TARGET==0] 
+    data_minority=data[data.TARGET==1]  
+
+    data_minority_over = data_minority.sample(count_majority, replace=True)
+    data_oversampled=pd.concat([data_minority_over,data_majority])
+
+    print(data_oversampled['TARGET'].value_counts())
+    return data_oversampled
+
+def undersampling_dataset(data):
+    count_majority, count_minority = data['TARGET'].value_counts()
+    
+    data_majority=data[data.TARGET==0] 
+    data_minority=data[data.TARGET==1]  
+
+    data_majority_under = data_majority.sample(count_minority)
+    data_underampled=pd.concat([data_majority_under,data_minority])
+
+    print(data_underampled['TARGET'].value_counts())
+    return data_underampled
 
 df_train = cs.loadData("train.csv")
 df_test = cs.loadData("test.csv")

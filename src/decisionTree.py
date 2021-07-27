@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 import joblib
-from sklearn.metrics import log_loss, plot_confusion_matrix
+from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from data_preprocess import oversampling_dataset
 import matplotlib.pyplot as plt
 
 def loadData(path):
@@ -37,15 +39,16 @@ def find_best_depth():
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    n_rows = df_train_x.shape[0]
-    rows_split = int((n_rows + 1)/2)
-    X_train = df_train_x[0 : rows_split]
-    Y_train = y_train[0 : rows_split]
-    X_test = df_train_x[rows_split : n_rows]
-    Y_test = y_train[rows_split : n_rows]
+    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    
+    # oversample the data
+    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
+    oversampled_train = oversampling_dataset(X_train)
+    X_train = oversampled_train.drop(['TARGET'], axis=1)
+    Y_train = oversampled_train['TARGET']
     
     #loss_list = []
-    accuracy_list=[]
+    score_list=[]
     
     # fit the data into the model
     depth_grid = range(1, 100)
@@ -58,17 +61,17 @@ def find_best_depth():
         #print("loss: ", loss, "  depth: ", i)
         #loss_list.append(loss)
         
-        prediction = decisionTree.predict(X_test)
-        accuracy = accuracy_score(Y_test, prediction)
-        print("accuracy: ", accuracy, "  depth: ", i)
-        accuracy_list.append(accuracy)
+        prediction = decisionTree.predict_proba(X_test)[:,1]
+        roc_score = roc_auc_score(Y_test, prediction)
+        print("accuracy: ", roc_score, "  depth: ", i)
+        score_list.append(roc_score)
     
     plt.figure(figsize=(12, 6))
-    plt.plot(depth_grid, accuracy_list, color='red', linestyle='dashed', marker='o',
+    plt.plot(depth_grid, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('Accuracy')
+    plt.title('ROC score with oversampled data')
     plt.xlabel('depth')
-    plt.ylabel('Accuracy')
+    plt.ylabel('ROC score')
     plt.show()
     return
 
@@ -88,16 +91,29 @@ def test_decisionTree():
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    n_rows = df_train_x.shape[0]
-    rows_split = int((n_rows + 1)/2)
-    X_train = df_train_x[0 : rows_split]
-    Y_train = y_train[0 : rows_split]
-    X_test = df_train_x[rows_split : n_rows]
-    Y_test = y_train[rows_split : n_rows]
+    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    
+    # oversample the data
+    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
+    oversampled_train = oversampling_dataset(X_train)
+    X_train = oversampled_train.drop(['TARGET'], axis=1)
+    Y_train = oversampled_train['TARGET']
     
     # fit the data into the model
     decisionTree = DecisionTreeClassifier(max_depth=20)
     decisionTree.fit(X_train, Y_train)
+    
+    prediction = decisionTree.predict_proba(X_test)[:,1]
+    false_positive_rate, true_positive_rate, threshold1 = roc_curve(Y_test, prediction)
+    print('roc_auc_score for DecisionTree: ', roc_auc_score(Y_test, prediction))
+    
+    plt.title('ROC - DecisionTree')
+    plt.plot(false_positive_rate, true_positive_rate)
+    plt.plot([0, 1], ls="--")
+    plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
     
     plot_confusion_matrix(decisionTree, X_test, Y_test)
     plt.show()

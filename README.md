@@ -17,6 +17,9 @@
         Y_train.csv: the output of training set
         X_test.csv: the input of testing set
 
+    Unsampling data:
+        our data is highly imbalanced, so we might need to oversample our data.
+
 ## Feature selection:
     Filter based method:
         1. pearson correlation: (this is already done by Farnaz in dropCorrelatedFeatures() function)
@@ -56,3 +59,6 @@
 
 ## A combination of KNN, decision Tree and neural network model:
     Score for submission: 0.786
+
+## model analysis:
+    roc_auc_score

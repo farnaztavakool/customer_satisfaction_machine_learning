@@ -2,8 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from sklearn.externals import joblib
 import joblib
-from sklearn.metrics import log_loss
+from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from data_preprocess import undersampling_dataset
 import customer_satisfaction as cs
 
 def find_best_k_value():
@@ -20,33 +22,34 @@ def find_best_k_value():
     df_train_x, y_train, df_test = preprocessData(df_train, df_test)
     '''
     df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(loadData('Y_train.csv'))
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
     df_test = cs.loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    n_rows = df_train_x.shape[0]
-    rows_split = int((n_rows + 1)/2)
-    X_train = df_train_x[0 : rows_split]
-    Y_train = y_train[0 : rows_split]
-    X_test = df_train_x[rows_split : n_rows]
-    Y_test = y_train[rows_split : n_rows]
+    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
 
-    loss_list = []
-    n_neighbors_grid = range(8, 41, 8)
+    # undersample the data
+    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
+    undersampled_train = undersampling_dataset(X_train)
+    X_train = undersampled_train.drop(['TARGET'], axis=1)
+    Y_train = undersampled_train['TARGET']
+
+    score_list = []
+    n_neighbors_grid = range(5, 51, 5)
     for i in n_neighbors_grid:
         knn = KNeighborsClassifier(n_neighbors=i)
         knn.fit(X_train, Y_train)
-        loss = log_loss(Y_test, knn.predict_proba(X_test))
-        loss_list.append(loss)
-        print('loss: ', loss, "  number of neighbours: ", i)
+        score = roc_auc_score(Y_test, knn.predict_proba(X_test)[:,1])
+        score_list.append(score)
+        print('roc_auc_score: ', score, "  number of neighbours: ", i)
         
     plt.figure(figsize=(12, 6))
-    plt.plot(n_neighbors_grid, loss_list, color='red', linestyle='dashed', marker='o',
+    plt.plot(n_neighbors_grid, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('Loss')
+    plt.title('roc_auc_score')
     plt.xlabel('number of neighbors')
-    plt.ylabel('Loss')
+    plt.ylabel('score')
     plt.show()
 
 def train_KNN_model():
@@ -89,9 +92,9 @@ def test_KNN_model():
     joblib.dump(knn, 'model_KNN.joblib')
     
 def test_load_model():
-    df_train_x = loadData('X_train.csv')
-    y_train = np.ravel(loadData('Y_train.csv'))
-    df_test = loadData('X_test.csv')
+    df_train_x = cs.loadData('X_train.csv')
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
+    df_test = cs.loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
@@ -108,4 +111,4 @@ def test_load_model():
     print('loss: ', loss)
     print('score: ',score)
     
-train_KNN_model()
+find_best_k_value()
