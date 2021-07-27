@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+#from sklearn.externals import joblib
+import joblib
 from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -61,9 +63,12 @@ def train_KNN_model():
     knn.fit(df_train_x, y_train)
     
     submission = loadData('sample_submission.csv')
-    target = knn.predict(df_test)
-    submission['TARGET'] = target
-    submission.to_csv('submission.csv', index=False)
+    target = knn.predict_proba(df_test)
+    submission['TARGET'] = target[:,1]
+    submission.to_csv('submission_KNN.csv', index=False)
+    
+    # save the model
+    joblib.dump(knn, 'model_KNN.joblib')
     
 def test_KNN_model():
     df_train_x = loadData('X_train.csv')
@@ -86,6 +91,26 @@ def test_KNN_model():
     print('loss: ', loss)
     print('score: ',score)
     
+    joblib.dump(knn, 'model_KNN.joblib')
     
+def test_load_model():
+    df_train_x = loadData('X_train.csv')
+    y_train = np.ravel(loadData('Y_train.csv'))
+    df_test = loadData('X_test.csv')
+    
+    # split train data into two separate sets
+    # one for training and the other one for testing
+    X_train = df_train_x[0 : 10000]
+    Y_train = y_train[0 : 10000]
+    X_test = df_train_x[10000 : 15000]
+    Y_test = y_train[10000 : 15000]
+    
+    knn = joblib.load('model_KNN.joblib')
+    predict = knn.predict_proba(X_test)
+    loss = log_loss(Y_test, predict)
+    score = knn.score(X_test, Y_test)
+    print(predict[:,1])
+    print('loss: ', loss)
+    print('score: ',score)
     
 train_KNN_model()
