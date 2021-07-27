@@ -31,7 +31,7 @@ def train_NN_model():
     Y_test = y_train[rows_split : n_rows]
 
     loss_list = []
-    n_neighbors_grid = range(40, 201, 40)
+    n_neighbors_grid = range(8, 41, 8)
     for i in n_neighbors_grid:
         knn = KNeighborsClassifier(n_neighbors=i)
         knn.fit(X_train, Y_train)
