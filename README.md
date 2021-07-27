@@ -7,6 +7,14 @@
 <img width="568" alt="image" src="https://user-images.githubusercontent.com/60339514/126883739-089cd32e-9daf-4b0f-a00e-6e1fcb2a5e41.png">
 
 
+## data preprocess:
+    I separate the data preprocess so that we don't need to preprocess data every time we train our model. However, the output of the csv files are too large
+    to push to github repo. So just run data_preprocess.py and it will export the training and test set. I also added these csv files into .gitignore so that 
+    we won't commit it accidentlly.
+        X_train.csv: the input of training set
+        Y_train.csv: the output of training set
+        X_test.csv: the input of testing set
+
 ## Feature selection:
     Filter based method:
         1. pearson correlation: (this is already done by Farnaz in dropCorrelatedFeatures() function)
@@ -26,3 +34,7 @@
         2. Analysis of Variance (ANOVA):
             this is a supervised feature selection method which uses f-statistic of each features to determine which feature is important.
             We need to decide how many features to keep in order to get a good prediction.
+
+
+## KNN model:
+    The training for KNN model is really slow, have no idead why

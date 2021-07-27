@@ -1,7 +1,11 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
-from customer_satisfaction import preprocessData
 
 def train_NN_model():
+    '''
     df_train = loadData("train.csv")
     df_test = loadData("test.csv")
 
@@ -12,6 +16,10 @@ def train_NN_model():
     df_test = df_test.drop(columns = "ID")
 
     df_train_x, y_train, df_test = preprocessData(df_train, df_test)
+    '''
+    df_train_x = loadData('X_train.csv')
+    y_train = np.ravel(loadData('Y_train.csv'))
+    df_test = loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
@@ -22,10 +30,26 @@ def train_NN_model():
     X_test = df_train_x[rows_split : n_rows]
     Y_test = y_train[rows_split : n_rows]
 
-    n_neighbors = 100
-    knn = KNeighborsClassifier(n_neighbors=n_neighbors)
-    knn.fit(X_train, Y_train)
+    loss_list = []
+    n_neighbors_grid = range(40, 201, 40)
+    for i in n_neighbors_grid:
+        knn = KNeighborsClassifier(n_neighbors=i)
+        knn.fit(X_train, Y_train)
+        loss = log_loss(Y_test, knn.predict_proba(X_test))
+        loss_list.append(loss)
+        print('loss: ', loss, "  number of neighbours: ", i)
+        
+    plt.figure(figsize=(12, 6))
+    plt.plot(n_neighbors_grid, loss_list, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=10)
+    plt.title('Loss')
+    plt.xlabel('number of neighbors')
+    plt.ylabel('Loss')
+    plt.show()
+    
+    
+def loadData(path):
+    df= pd.read_csv(path)
+    return pd.DataFrame(df)
 
-    loss = log_loss(Y_test, knn.predict_proba(X_test))
-    # print(pd.DataFrame({'ID':ID_test, "Target": prediction}))
-    print('loss: ', loss)
+train_NN_model()
