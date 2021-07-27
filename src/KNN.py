@@ -3,11 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
-<<<<<<< HEAD
-from customer_satisfaction import preprocessData
-from sklearn.metrics import log_loss
-=======
->>>>>>> knn
 
 def train_NN_model():
     '''
@@ -57,10 +52,4 @@ def loadData(path):
     df= pd.read_csv(path)
     return pd.DataFrame(df)
 
-<<<<<<< HEAD
-    loss = log_loss(Y_test, knn.predict_proba(X_test))
-    # print(pd.DataFrame({'ID':ID_test, "Target": prediction}))
-    print('loss: ', loss)
-=======
 train_NN_model()
->>>>>>> knn
