@@ -53,6 +53,9 @@
 ## decision Tree model:
     Score for submission: 0.71 (depth = 20)
 
+## Logistic Regression model:
+    Score for submission: 0.793
+
 ## A combination of KNN and decision Tree model:
     Score for submission: 0.749
 
