@@ -1,23 +1,13 @@
-import numpy as np
-import pandas as pd
-# possible change to pytorch  
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import log_loss
 from keras.models import Sequential
 from keras.layers import Dense
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import VarianceThreshold
-from feature_engine.selection import DropCorrelatedFeatures
-from sklearn.neural_network import MLPClassifier
-from keras.models import Sequential
-from keras.layers import Dense
 import customer_satisfaction as cs
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.metrics import roc_auc_score, roc_curve
 
 # These variales will be set during modelling
 output_dim_const = 0
@@ -32,8 +22,8 @@ def main():
     df_test = cs.loadData('X_test.csv')
     
     global_var = globals()
-    # output_dim = find_best_output_size(df_train, y_train)
-    output_dim = 125
+    output_dim = find_best_output_size(df_train_x, y_train)
+    # output_dim = 125
     global_var['input_dim_const'] = df_train_x.shape[1]
     global_var['output_dim_const'] = output_dim
     
@@ -43,7 +33,7 @@ def main():
     prediction = get_CV_prediction(df_train_x, y_train, output_dim_const, df_test)
     write_data(prediction)
     
-    print('loss: ', test_nn_model(df_train_x,y_train,output_dim))
+    print('roc_auc_score: ', test_nn_model(df_train_x,y_train,output_dim))
 
    
 
@@ -52,7 +42,7 @@ def tune(x,y):
     batch_size = [1000,5000,10000]
     model = KerasClassifier(build_fn=create_model,verbose=0)
     param_grid = dict(epochs=epochs,batch_size=batch_size)
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=10)
+    grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=5)
     return grid.fit(x, y).best_params_
     
     
@@ -79,7 +69,7 @@ def fit_model(x,y,output_dim,test,epoch,batch_size):
     model = build_model(x.shape[1],output_dim)
     model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1)
     # model.fit(x, y,epochs=20,batch_size=10000)
-    return model.predict_proba(test)[:,0]
+    return model.predict(test)[:,0]
 
 # do train_test split to get an estimation of the loss    
 def test_nn_model(x,y,output_dim):
@@ -90,45 +80,51 @@ def test_nn_model(x,y,output_dim):
     x_test = x[rows_split : n_rows]
     y_test = y[rows_split : n_rows]
     y_test_prediction = fit_model(x_train,y_train,output_dim, x_test,epoch_const,batch_size_const)
-    return log_loss(y_test, y_test_prediction)
+    return roc_auc_score(y_test,y_test_prediction)
 
     
 # use cross fold to find the best value for number of neurons in the hidden layer
 def find_best_output_size(x, y):
     x = x.to_numpy()
-    scores = [0] * 10
-    alpha_list = [i+1 for i in range(10)]
-    kfold = KFold(n_splits=10)
+    scores = [0] * 5
+    alpha_list = [i+1 for i in range(5)]
+    kfold = KFold(n_splits=5)
     for alpha in alpha_list:
         for train, test in kfold.split(x, y):
             output_dim = getNumberOfNeurons(x.shape[0], alpha,x.shape[1])
-            fit_mode(x[train],y[train],output_dim)
-            # model = build_model(x[train].shape[1],output_dim)
-            # model.fit(x[train], y[train],verbose=1)
-            scores[alpha-1]+=model.evaluate(x[test], y[test], verbose=0)
-        scores[alpha-1] = scores[alpha-1]/10
+            y_pred = fit_model(x[train],y[train],output_dim,x[test],1,1000)
+            scores[alpha-1]+=roc_auc_score(y[test],y_pred)
+            
+        scores[alpha-1] = scores[alpha-1]/5
+        
+    plt.figure(figsize=(12, 6))
+    plt.plot(alpha_list, scores, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=5)
+    plt.title('roc_auc_score')
+    plt.ylabel('score')
+    plt.show(block=False)
     alpha = scores.index(min(scores)) +1
     return getNumberOfNeurons(x.shape[0], alpha, x.shape[1])
 
 # use cross fold to get the final prediction
 def get_CV_prediction(x, y, output_dim, test_data):
     x = x.to_numpy()
-    # best_params = tune(x,y)
-    # print(best_params)
-    # epochs = best_params['epochs']
-    # batch_size = best_params['batch_size']
-    epochs = 20
-    batch_size = 10000
+    best_params = tune(x,y)
+    epochs = best_params['epochs']
+    batch_size = best_params['batch_size']
+    # epochs = 20
+    # batch_size = 10000
     var = globals()
     var["epoch_const"] = epochs
     var["batch_size_const"] = batch_size
     model = build_model(x.shape[1],output_dim)
     prediction = fit_model(x,y,output_dim, test_data,epochs,batch_size)
+    
     kfold = KFold(n_splits=10)
     
     for train, test in kfold.split(x, y):
         prediction+= fit_model(x[train],y[train],output_dim,test_data,epochs,batch_size)
-    
+        
     prediction = prediction/11
     return prediction
 
