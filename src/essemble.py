@@ -20,7 +20,7 @@ def essemble_model():
     knn_prediction = knn.predict_proba(df_test)[:,1]
     
     
-    nn_prediction = np.array(loadData('nn_output.csv'))
+    nn_prediction = np.array(loadData('NN_output.csv'))
     nn_prediction = nn_prediction[:,1]
     
     final_prediction = knn_prediction/3 + decisionTree_prediction/3 + nn_prediction/3

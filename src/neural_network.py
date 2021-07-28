@@ -8,89 +8,131 @@ from keras.layers import Dense
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import VarianceThreshold
 from feature_engine.selection import DropCorrelatedFeatures
-# possible change to pytorch  
 from sklearn.neural_network import MLPClassifier
 from keras.models import Sequential
 from keras.layers import Dense
-from customer_satisfaction import preprocessData
+import customer_satisfaction as cs
+import math
+from keras.wrappers.scikit_learn import KerasClassifier
 
-def train_NN_model():
+# These variales will be set during modelling
+output_dim_const = 0
+input_dim_const = 0 
+epoch_const = 0
+batch_size_const = 0
+
+def main():
+  
+    df_train_x = cs.loadData('X_train.csv')
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
+    df_test = cs.loadData('X_test.csv')
+    
+    global_var = globals()
+    # output_dim = find_best_output_size(df_train, y_train)
+    output_dim = 125
+    global_var['input_dim_const'] = df_train_x.shape[1]
+    global_var['output_dim_const'] = output_dim
+    
+ 
+    print("the best number of neurons is:", output_dim_const)
    
-    df_train = loadData("train.csv")
-    df_test = loadData("test.csv")
-
-    # dropping "ID" from both training and test data
-    ID_train = df_train["ID"].copy()
-    ID_test = df_test["ID"].copy()
-    df_train = df_train.drop(columns = "ID")
-    df_test = df_test.drop(columns = "ID")
-
-    df_train_x, y_train, df_test = preprocessData(df_train, df_test)
+    prediction = get_CV_prediction(df_train_x, y_train, output_dim_const, df_test)
+    write_data(prediction)
     
-    # split train data into two separate sets
-    # one for training and the other one for testing
-    n_rows = df_train_x.shape[0]
-    rows_split = int((n_rows + 1)/2)
-    X_train = df_train_x[0 : rows_split]
-    Y_train = y_train[0 : rows_split]
-    X_test = df_train_x[rows_split : n_rows]
-    Y_test = y_train[rows_split : n_rows]
+    print('loss: ', test_nn_model(df_train_x,y_train,output_dim))
 
+   
+
+def tune(x,y):
+    epochs = [10,20,30]
+    batch_size = [1000,5000,10000]
+    model = KerasClassifier(build_fn=create_model,verbose=0)
+    param_grid = dict(epochs=epochs,batch_size=batch_size)
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=10)
+    return grid.fit(x, y).best_params_
     
-    output_dim = findBestOutputSize(df_train_x, y_train)
     
-    model = build_model(df_train_x.shape[1], output_dim)
-    model.fit(df_train_x, y_train)
-    prediction = model.predict_proba(df_test)[:,0]
-    
-    model2 = build_model(X_train.shape[1], output_dim)
-    model2.fit(X_train, Y_train)
-    prediction2 = model.predict(X_test)[:,0]
+# wrapper function for gridsearch
+def create_model():
+    return build_model(input_dim_const,output_dim_const)
 
-    loss = log_loss(Y_test, prediction2)
-    # print(pd.DataFrame({'ID':ID_test, "Target": prediction}))
-    print('loss: ', loss)
-
-    return pd.DataFrame({'ID':ID_test, "Target": prediction})
-
-
-def loadData(path):
-    df= pd.read_csv(path)
-    return pd.DataFrame(df)
-
-
+# writting the output to CSV
+def write_data(prediction):
+    submission = cs.loadData('sample_submission.csv')
+    submission['TARGET'] = prediction
+    submission.to_csv("NN_output.csv", index=False)
+ 
+# build the NN model based on the given config   
 def build_model(input_dim, output_dim):
     model = Sequential()
-    model.add(Dense(output_dim,input_dim = input_dim, kernel_initializer='uniform', activation = 'tanh'))
-    model.add(Dense(1,input_dim = output_dim, kernel_initializer='uniform', activation = 'sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam')   
+    model.add(Dense(output_dim,input_dim = input_dim, kernel_initializer='uniform', activation = 'relu'))
+    model.add(Dense(1, activation = 'sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])   
     return model
 
-# use cross fold to get the accuracy of the model with different size 
-def findBestOutputSize(data, y):
-    data = data.to_numpy()
-    y = y.to_numpy()
+# fit the NN model 
+def fit_model(x,y,output_dim,test,epoch,batch_size):
+    model = build_model(x.shape[1],output_dim)
+    model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1)
+    # model.fit(x, y,epochs=20,batch_size=10000)
+    return model.predict_proba(test)[:,0]
+
+# do train_test split to get an estimation of the loss    
+def test_nn_model(x,y,output_dim):
+    n_rows = x.shape[0]
+    rows_split = int((n_rows + 1)/2)
+    x_train = x[0 : rows_split]
+    y_train = y[0 : rows_split]
+    x_test = x[rows_split : n_rows]
+    y_test = y[rows_split : n_rows]
+    y_test_prediction = fit_model(x_train,y_train,output_dim, x_test,epoch_const,batch_size_const)
+    return log_loss(y_test, y_test_prediction)
+
+    
+# use cross fold to find the best value for number of neurons in the hidden layer
+def find_best_output_size(x, y):
+    x = x.to_numpy()
     scores = [0] * 10
     alpha_list = [i+1 for i in range(10)]
     kfold = KFold(n_splits=10)
     for alpha in alpha_list:
-        for train, test in kfold.split(data, y):
-            output_dim = getNumberOfNeurons(data, alpha)
-            model = build_model(data[train].shape[1],output_dim)
-            model.fit(data[train], y[train])
-            scores[alpha-1]+=model.evaluate(data[test], y[test], verbose=0)
+        for train, test in kfold.split(x, y):
+            output_dim = getNumberOfNeurons(x.shape[0], alpha,x.shape[1])
+            fit_mode(x[train],y[train],output_dim)
+            # model = build_model(x[train].shape[1],output_dim)
+            # model.fit(x[train], y[train],verbose=1)
+            scores[alpha-1]+=model.evaluate(x[test], y[test], verbose=0)
         scores[alpha-1] = scores[alpha-1]/10
     alpha = scores.index(min(scores)) +1
-    return getNumberOfNeurons(data, alpha)
+    return getNumberOfNeurons(x.shape[0], alpha, x.shape[1])
 
-def getNumberOfNeurons(data, alpha ):
-    return (data.shape[0]/(alpha*(data.shape[1]+1)))
+# use cross fold to get the final prediction
+def get_CV_prediction(x, y, output_dim, test_data):
+    x = x.to_numpy()
+    # best_params = tune(x,y)
+    # print(best_params)
+    # epochs = best_params['epochs']
+    # batch_size = best_params['batch_size']
+    epochs = 20
+    batch_size = 10000
+    var = globals()
+    var["epoch_const"] = epochs
+    var["batch_size_const"] = batch_size
+    model = build_model(x.shape[1],output_dim)
+    prediction = fit_model(x,y,output_dim, test_data,epochs,batch_size)
+    kfold = KFold(n_splits=10)
+    
+    for train, test in kfold.split(x, y):
+        prediction+= fit_model(x[train],y[train],output_dim,test_data,epochs,batch_size)
+    
+    prediction = prediction/11
+    return prediction
 
+def getNumberOfNeurons(observation_size,alpha, input_size ):
+    return math.floor(observation_size/(alpha*(input_size+1)))
 
-
-
-train_NN_model().to_csv("nn_output.csv",index=False)
+main()
