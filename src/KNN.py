@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import KFold
 # from sklearn.model_selection import train_test_split
 from data_preprocess import consistent_sampling
 # undersampling_dataset, 
@@ -32,8 +33,7 @@ def find_best_k_value():
     # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
     df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
     X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
-    print(Y_test)
-    # print(Y_test)
+    
     # # undersample the data
     # X_train.insert(X_train.shape[1], 'TARGET', Y_train)
     # undersampled_train = undersampling_dataset(X_train)
@@ -41,19 +41,22 @@ def find_best_k_value():
     # Y_train = undersampled_train['TARGET']
 
     score_list = []
-    n_neighbors_grid = range(5, 51, 5)
+    n_neighbors_grid = range(200, 1001, 200)
+    kfold = KFold(n_splits=5)
     for i in n_neighbors_grid:
-        print("going through neighbours")
-        knn = KNeighborsClassifier(n_neighbors=i,leaf_size=1000)
-        knn.fit(X_train, Y_train)
-        score = roc_auc_score(Y_test, knn.predict_proba(X_test)[:,1])
-        score_list.append(score)
-        print('roc_auc_score: ', score, "  number of neighbours: ", i)
+        score = 0
+        for train, test in kfold.split(X_train, Y_train):
+            knn = KNeighborsClassifier(n_neighbors=i)
+            knn.fit(X_train[train], Y_train[train])
+            score += roc_auc_score(Y_test, knn.predict_proba(X_train[test])[:,1])
+        
+        score_list.append(score/5)
+        print('roc_auc_score: ', score/5, "  number of neighbours: ", i)
         
     plt.figure(figsize=(12, 6))
     plt.plot(n_neighbors_grid, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('roc_auc_score')
+    plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
     # plt.show()
