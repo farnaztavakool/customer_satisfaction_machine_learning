@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from sklearn.externals import joblib
 import joblib
-from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
+from sklearn.metrics import plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
-from data_preprocess import undersampling_dataset
+# from sklearn.model_selection import train_test_split
+from data_preprocess import consistent_sampling
+# undersampling_dataset, 
 import customer_satisfaction as cs
 
 def find_best_k_value():
@@ -21,24 +22,28 @@ def find_best_k_value():
 
     df_train_x, y_train, df_test = preprocessData(df_train, df_test)
     '''
+    print("started the function")
     df_train_x = cs.loadData('X_train.csv')
     y_train = np.ravel(cs.loadData('Y_train.csv'))
     df_test = cs.loadData('X_test.csv')
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
-
-    # undersample the data
-    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    undersampled_train = undersampling_dataset(X_train)
-    X_train = undersampled_train.drop(['TARGET'], axis=1)
-    Y_train = undersampled_train['TARGET']
+    # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
+    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
+    print("sampling is done")
+    # # undersample the data
+    # X_train.insert(X_train.shape[1], 'TARGET', Y_train)
+    # undersampled_train = undersampling_dataset(X_train)
+    # X_train = undersampled_train.drop(['TARGET'], axis=1)
+    # Y_train = undersampled_train['TARGET']
 
     score_list = []
     n_neighbors_grid = range(5, 51, 5)
     for i in n_neighbors_grid:
-        knn = KNeighborsClassifier(n_neighbors=i)
+        print("going through neighbours")
+        knn = KNeighborsClassifier(n_neighbors=i,leaf_size=1000)
         knn.fit(X_train, Y_train)
         score = roc_auc_score(Y_test, knn.predict_proba(X_test)[:,1])
         score_list.append(score)

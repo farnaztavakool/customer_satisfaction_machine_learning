@@ -2,6 +2,7 @@ from sklearn.tree import DecisionTreeClassifier
 import customer_satisfaction as cs
 import pandas as pd
 from sklearn.utils import resample
+import random
 
 def preprocessData(df_train, df_test):
 
@@ -63,6 +64,34 @@ def undersampling_dataset(data):
 
     print(data_underampled['TARGET'].value_counts())
     return data_underampled
+
+'''
+1) getting half of unsatisfied
+2) getting half of satisfied 
+3) concatenating them to have a representative sample
+'''
+def consistent_sampling(data):
+    
+    count_majority, count_minority = data['TARGET'].value_counts()
+    data_majority=data[data.TARGET==0] 
+    data_minority=data[data.TARGET==1] 
+    
+    random.shuffle(data_minority)
+    random.shuffle(data_majority)
+    
+    sample_minority_train_ = data_minority[:count_minority/2]
+    sample_majority_train = data_majority[:count_majority/2]
+    #sample_minority_train = data_minority[:count_minority/2].drop('TARGET')
+    
+    sample_train = pd.concat([sample_majority_train, sample_minority_train])
+
+    sample_majority_test = data_majority[count_majority/2:]
+    sample_minority_test = data_minority[count_minority/2:]
+    sample_test = pd.concat([sample_majority_test, sample_minority_test])
+    
+    return sample_train.drop(['TARGET'], axis=1),sample_test.drop(['TARGET'], axis=1),sample_train['TARGET'], sample_test['TARGET']
+     
+
 
 df_train = cs.loadData("train.csv")
 df_test = cs.loadData("test.csv")
