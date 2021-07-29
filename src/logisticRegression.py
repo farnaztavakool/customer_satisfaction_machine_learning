@@ -61,7 +61,8 @@ def find_best_solver():
     plt.title('ROC score')
     plt.xlabel('solver')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_solver.png', bbox_inches='tight')
     
     return
 
@@ -94,7 +95,8 @@ def find_best_C():
     plt.title('ROC score')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_c.png', bbox_inches='tight')
     
     return
 
@@ -133,7 +135,8 @@ def find_best_C_oversampled():
     plt.title('ROC score with undersampled data')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_score.png', bbox_inches='tight')
     
     return
 
