@@ -55,7 +55,8 @@ def find_best_k_value():
     plt.title('roc_auc_score')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/knn_score.png', bbox_inches='tight')
 
 def train_KNN_model():
     df_train_x = cs.loadData('X_train.csv')

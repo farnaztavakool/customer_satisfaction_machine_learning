@@ -122,7 +122,8 @@ def find_best_output_size(sampled_data):
             markerfacecolor='blue', markersize=5)
     plt.title('roc_auc_score')
     plt.ylabel('score')
-    plt.show(block=False)
+    # plt.show(block=False)
+    plt.savefig('images/network_score.png', bbox_inches='tight')
     alpha = scores.index(min(scores)) +1
     return getNumberOfNeurons(x.shape[0], alpha, x.shape[1])
 
