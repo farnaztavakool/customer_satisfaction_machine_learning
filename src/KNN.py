@@ -51,7 +51,7 @@ def find_best_k_value():
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
     # plt.show()
-    plt.savefig('images/knn.png', bbox_inches='tight')
+    plt.savefig('images/knn_score.png', bbox_inches='tight')
 
 def train_KNN_model():
     df_train_x = cs.loadData('X_train.csv')
