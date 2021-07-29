@@ -72,7 +72,8 @@ def find_best_depth():
     plt.title('ROC score with oversampled data')
     plt.xlabel('depth')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/tree_score.png', bbox_inches='tight')
     return
 
 def accuracy_score(Y_true, Y_predict):
@@ -113,7 +114,8 @@ def test_decisionTree():
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/tree_test.png', bbox_inches='tight')
     
     plot_confusion_matrix(decisionTree, X_test, Y_test)
     plt.show()
