@@ -61,24 +61,28 @@ def step_decay_schedule(init_lr = 1e-3, decay_factor = 0.75, step_size = 10):
 lr_schedule = step_decay_schedule(init_lr=1e-4, decay_factor=0.72, step_size=2)
 
 
--------(2)------------
-initial_learning_rate = 0.01
-decay = initial_learning_rate / epochs
-def lr_time_based_decay(epoch, lr):
-    return lr * 1 / (1 + decay * epochs)
 '''
 
-   
+
+# Learning rate schedule (2)
+initial_learning_rate = 0.01
+epochs = 100
+decay = initial_learning_rate / epochs
+
+def lr_time_based(epoch, lr):
+    return lr * 1 / (1 + decay * epoch)
+
+
 
 def tune(x,y):
-    epochs = [10,20,30]
+    epochs = [10,20,30] 
     batch_size = [1000,5000,10000]
     
-    # Added learning rates here
-    learn_rate = [0.0005, 0.001, 0.00146]
+   
+    #learn_rate = [0.0005, 0.001, 0.00146]
     
     model = KerasClassifier(build_fn=create_model,verbose=0)
-    param_grid = dict(epochs=epochs,batch_size=batch_size, learn_rate=learn_rate)
+    param_grid = dict(epochs=epochs,batch_size=batch_size)
     grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=5)
     return grid.fit(x, y).best_params_
     
@@ -113,7 +117,7 @@ def fit_model(x,y,output_dim,test,epoch,batch_size):
     # model.fit(x, y,epochs=20,batch_size=10000)
     
     # Can be used for (2)
-    # model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1, callbacks=[LearningRateScheduler(lr_time_based_decay, verbose=1)])
+    model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1, callbacks=[LearningRateScheduler(lr_time_based, verbose=1)])
     return model.predict(test)[:,0]
 
 # do train_test split to get an estimation of the loss    
