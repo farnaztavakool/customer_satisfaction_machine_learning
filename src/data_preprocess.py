@@ -85,8 +85,8 @@ def consistent_sampling(data):
  
     # print(y_test_majority)
 
-        
-    x_test = pd.concat([x_test_majority, x_test_minority], axis=0)
+    size = math.floor(count_majority/2) + math.floor(count_minority/2)
+    x_test = pd.concat([x_test_majority, x_test_minority], axis=0).reset_index(drop=True)
     x_train = pd.concat([x_train_majority, x_train_minority], axis=0)
     y_train = pd.concat([y_train_majority, y_train_minority], axis=0).to_numpy()
     y_test = pd.concat([y_test_majority, y_test_minority], axis=0).to_numpy()
