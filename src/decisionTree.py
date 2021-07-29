@@ -47,6 +47,11 @@ def find_best_depth():
     X_train = oversampled_train.drop(['TARGET'], axis=1)
     Y_train = oversampled_train['TARGET']
     
+    X_test.insert(X_test.shape[1], 'TARGET', Y_test)
+    oversampled_test = oversampling_dataset(X_test)
+    X_test = oversampled_test.drop(['TARGET'], axis=1)
+    Y_test = oversampled_test['TARGET']
+    
     #loss_list = []
     score_list=[]
     
@@ -120,4 +125,4 @@ def test_decisionTree():
     
     return
 
-test_decisionTree()
+find_best_depth()
