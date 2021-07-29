@@ -118,7 +118,8 @@ def test_decisionTree():
     plt.savefig('images/tree_test.png', bbox_inches='tight')
     
     plot_confusion_matrix(decisionTree, X_test, Y_test)
-    plt.show()
+    # plt.show()
+    plt.savefig('images/tree_cm.png', bbox_inches='tight')
     
     return
 
