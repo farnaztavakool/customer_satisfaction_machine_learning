@@ -8,22 +8,14 @@ import customer_satisfaction as cs
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.metrics import roc_auc_score, roc_curve
-from data_preprocess import undersampling_dataset
+from data_preprocess import consistent_sampling
 # These variales will be set during modelling
 output_dim_const = 0
 input_dim_const = 0 
 epoch_const = 0
 batch_size_const = 0
 
-def sample(train_x, train_y):
-    X_train, X_test, Y_train, Y_test = train_test_split(train_x, y_train, test_size = 0.3)
 
-    # undersample the data
-    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    undersampled_train = undersampling_dataset(X_train)
-    X_train = undersampled_train.drop(['TARGET'], axis=1)
-    Y_train = undersampled_train['TARGET']
-    return [X_train, Y_train, X_test, Y_test]
 
 def main():
   
@@ -31,26 +23,31 @@ def main():
     y_train = np.ravel(cs.loadData('Y_train.csv'))
     df_test = cs.loadData('X_test.csv')
     
-    # split train data into two separate sets
-    # one for training and the other one for testing
-   
-
+    print("Sampling the data for NN")
+    df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
+    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
+  
+    df_train_x = df_train_x.drop(['TARGET'], axis=1)
+  
+    print("Finding number of neurons for NN")
     global_var = globals()
     
-    sampled_data = sample(df_train_x, y_train)
-    output_dim = find_best_output_size(sampled_data)
-    # output_dim = 125
-    # global_var['input_dim_const'] = df_train_x.shape[1]
-    # global_var['output_dim_const'] = output_dim
+    output_dim = find_best_output_size(X_train, Y_train, X_test, Y_test)
     
- 
-    # print("the best number of neurons is:", output_dim_const)
-   
-    # prediction = get_CV_prediction(df_train_x, y_train, output_dim_const, df_test)
-    # write_data(prediction)
+    global_var['input_dim_const'] = df_train_x.shape[1]
+    global_var['output_dim_const'] = output_dim
     
-    # print('roc_auc_score: ', test_nn_model(df_train_x,y_train,output_dim))
-
+    print("gridsearch to find the best params")
+    best_params = tune(X_train,Y_train)
+    
+    
+    print("Getting the final prediction")
+    prediction = get_CV_prediction(df_train_x, y_train, best_params, df_test)
+  
+    print("writting the data into NN_output.csv")
+    write_data(prediction)
+    
+  
    
 
 def tune(x,y):
@@ -100,20 +97,20 @@ def test_nn_model(x,y,output_dim):
 
     
 # use cross fold to find the best value for number of neurons in the hidden layer
-def find_best_output_size(sampled_data):
-    x = sampled_data[0]
-    y = sampled_data[1]
-    x_test = sampled_data[2]
-    y_test = sampled_data[3]
-    
+def find_best_output_size(x_train, y_train, x_test, y_test):
+   
+    x_train = x_train.to_numpy()
     scores = [0] * 5
     alpha_list = [i+1 for i in range(5)]
     kfold = KFold(n_splits=5)
     for alpha in alpha_list:
-        for train, test in kfold.split(x, y):
-            output_dim = getNumberOfNeurons(x.shape[0], alpha,x.shape[1])
-            model = fit_model(x[train],y[train],output_dim,x[test],1,1000)
-            scores[alpha-1]+=roc_auc_score(y_test,model.predict_proba(x_test))
+        for train, test in kfold.split(x_train, y_train):
+            output_dim = getNumberOfNeurons(x_train.shape[0], alpha,x_train.shape[1])
+            
+            model = build_model(x_train[train].shape[1], output_dim)
+            model.fit(x_train[train], y_train[train])
+        
+            scores[alpha-1]+=roc_auc_score(y_test,model.predict(x_test)[:,0])
             
         scores[alpha-1] = scores[alpha-1]/5
         
@@ -122,29 +119,27 @@ def find_best_output_size(sampled_data):
             markerfacecolor='blue', markersize=5)
     plt.title('roc_auc_score')
     plt.ylabel('score')
-    # plt.show(block=False)
-    plt.savefig('images/network_score.png', bbox_inches='tight')
+    plt.show(block=False)
     alpha = scores.index(min(scores)) +1
-    return getNumberOfNeurons(x.shape[0], alpha, x.shape[1])
+    return getNumberOfNeurons(x_train.shape[0], alpha, x_train.shape[1])
 
 # use cross fold to get the final prediction
-def get_CV_prediction(x, y, output_dim, test_data):
+def get_CV_prediction(x, y, best_params, test_data):
     x = x.to_numpy()
-    best_params = tune(x,y)
+
     epochs = best_params['epochs']
     batch_size = best_params['batch_size']
-    # epochs = 20
-    # batch_size = 10000
+    
     var = globals()
     var["epoch_const"] = epochs
     var["batch_size_const"] = batch_size
-    model = build_model(x.shape[1],output_dim)
-    prediction = fit_model(x,y,output_dim, test_data,epochs,batch_size)
+
+    prediction = fit_model(x,y,output_dim_const, test_data,epochs,batch_size)
     
     kfold = KFold(n_splits=10)
     
     for train, test in kfold.split(x, y):
-        prediction+= fit_model(x[train],y[train],output_dim,test_data,epochs,batch_size)
+        prediction+= fit_model(x[train],y[train],output_dim_const,test_data,epochs,batch_size)
         
     prediction = prediction/11
     return prediction
