@@ -32,7 +32,8 @@ def find_best_k_value():
     # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
     df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
     X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
-    print("sampling is done")
+    print(Y_test)
+    # print(Y_test)
     # # undersample the data
     # X_train.insert(X_train.shape[1], 'TARGET', Y_train)
     # undersampled_train = undersampling_dataset(X_train)

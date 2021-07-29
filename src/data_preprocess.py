@@ -2,7 +2,8 @@ from sklearn.tree import DecisionTreeClassifier
 import customer_satisfaction as cs
 import pandas as pd
 from sklearn.utils import resample
-import random
+import math
+from sklearn.model_selection import train_test_split
 
 def preprocessData(df_train, df_test):
 
@@ -58,7 +59,8 @@ def undersampling_dataset(data):
     
     data_majority=data[data.TARGET==0] 
     data_minority=data[data.TARGET==1]  
-
+    print(data_majority, data_minority)
+    
     data_majority_under = data_majority.sample(count_minority)
     data_underampled=pd.concat([data_majority_under,data_minority])
 
@@ -75,22 +77,22 @@ def consistent_sampling(data):
     count_majority, count_minority = data['TARGET'].value_counts()
     data_majority=data[data.TARGET==0] 
     data_minority=data[data.TARGET==1] 
-    
-    random.shuffle(data_minority)
-    random.shuffle(data_majority)
-    
-    sample_minority_train_ = data_minority[:count_minority/2]
-    sample_majority_train = data_majority[:count_majority/2]
-    #sample_minority_train = data_minority[:count_minority/2].drop('TARGET')
-    
-    sample_train = pd.concat([sample_majority_train, sample_minority_train])
 
-    sample_majority_test = data_majority[count_majority/2:]
-    sample_minority_test = data_minority[count_minority/2:]
-    sample_test = pd.concat([sample_majority_test, sample_minority_test])
+ 
+    x_train_majority, x_test_majority, y_train_majority, y_test_majority = train_test_split(data_majority.drop(['TARGET'],axis=1), data_majority['TARGET'],train_size=math.floor(count_majority/2))
+    x_train_minority, x_test_minority, y_train_minority, y_test_minority = train_test_split(data_minority.drop(['TARGET'],axis=1), data_minority['TARGET'],train_size=math.floor(count_minority/2))
     
-    return sample_train.drop(['TARGET'], axis=1),sample_test.drop(['TARGET'], axis=1),sample_train['TARGET'], sample_test['TARGET']
-     
+ 
+    # print(y_test_majority)
+
+        
+    x_test = pd.concat([x_test_majority, x_test_minority], axis=0)
+    x_train = pd.concat([x_train_majority, x_train_minority], axis=0)
+    y_train = pd.concat([y_train_majority, y_train_minority], axis=0).to_numpy()
+    y_test = pd.concat([y_test_majority, y_test_minority], axis=0).to_numpy()
+   
+  
+    return x_train, x_test, y_train, y_test
 
 
 df_train = cs.loadData("train.csv")
