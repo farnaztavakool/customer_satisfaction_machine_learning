@@ -13,7 +13,6 @@ test_data = pd.read_csv('test.csv')
 features = train_data.drop(['ID', 'TARGET'], axis=1)
 print(train_data['TARGET'].value_counts())
 train_data['TARGET'].value_counts().plot.pie(explode=[0,0.1],autopct='%1.1f%%',shadow=True)
-plt.savefig('images/data_analysis.png', bbox_inches='tight')
 plt.show()
 
 
