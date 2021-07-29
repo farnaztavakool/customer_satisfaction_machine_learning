@@ -78,18 +78,30 @@ def build_model(input_dim, output_dim):
     model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])   
     return model
 
+# Tuning learning rate
 def step_decay_schedule(init_lr = 1e-3, decay_factor = 0.75, step_size = 10):
     #Wrapper to create learning rate scheduler with step decay schedule
-    def schedule(epoch):
-        return init_lr * (decay_factor ** np.floor(epoch/step_size))
+    def schedule(epochs):
+        return init_lr * (decay_factor ** np.floor(epochs/step_size))
     return LearningRateScheduler(schedule)
 lr_schedule = step_decay_schedule(init_lr=1e-4, decay_factor=0.72, step_size=2)
 
+
+'''
+-----Another trail-----
+
+initial_learning_rate = 0.01
+decay = initial_learning_rate / epochs
+def lr_time_based_decay(epoch, lr):
+    return lr * 1 / (1 + decay * epochs)
+
+'''
 # fit the NN model 
 def fit_model(x,y,output_dim,test,epoch,batch_size, lr_schedule):
     model = build_model(x.shape[1],output_dim)
     model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1, callbacks=[lr_schedule])
     # model.fit(x, y,epochs=20,batch_size=10000)
+    # model.fit(x, y,epochs=epoch,batch_size=batch_size,verbose=1, callbacks=[LearningRateScheduler(lr_time_based_decay, verbose=1)])
     return model.predict(test)[:,0]
 
 # do train_test split to get an estimation of the loss    
