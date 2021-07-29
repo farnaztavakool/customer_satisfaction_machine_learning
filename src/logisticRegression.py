@@ -66,7 +66,8 @@ def find_best_solver():
     plt.title('ROC score with 5-fold CV')
     plt.xlabel('solver')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_s.png', bbox_inches='tight')
     
     return
 
@@ -104,7 +105,8 @@ def find_best_C():
     plt.title('ROC score 5-fold CV')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_c1.png', bbox_inches='tight')
     
     return
 
@@ -148,7 +150,8 @@ def find_best_C_oversampled():
     plt.title('ROC score with oversampled data')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    plt.show()
+    # plt.show()
+    plt.savefig('images/regression_c2.png', bbox_inches='tight')
     
     return
 

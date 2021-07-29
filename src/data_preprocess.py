@@ -2,6 +2,8 @@ from sklearn.tree import DecisionTreeClassifier
 import customer_satisfaction as cs
 import pandas as pd
 from sklearn.utils import resample
+import math
+from sklearn.model_selection import train_test_split
 
 def preprocessData(df_train, df_test):
 
@@ -57,12 +59,41 @@ def undersampling_dataset(data):
     
     data_majority=data[data.TARGET==0] 
     data_minority=data[data.TARGET==1]  
-
+    print(data_majority, data_minority)
+    
     data_majority_under = data_majority.sample(count_minority)
     data_underampled=pd.concat([data_majority_under,data_minority])
 
     print(data_underampled['TARGET'].value_counts())
     return data_underampled
+
+'''
+1) getting half of unsatisfied
+2) getting half of satisfied 
+3) concatenating them to have a representative sample
+'''
+def consistent_sampling(data):
+    
+    count_majority, count_minority = data['TARGET'].value_counts()
+    data_majority=data[data.TARGET==0] 
+    data_minority=data[data.TARGET==1] 
+
+ 
+    x_train_majority, x_test_majority, y_train_majority, y_test_majority = train_test_split(data_majority.drop(['TARGET'],axis=1), data_majority['TARGET'],train_size=math.floor(count_majority/2))
+    x_train_minority, x_test_minority, y_train_minority, y_test_minority = train_test_split(data_minority.drop(['TARGET'],axis=1), data_minority['TARGET'],train_size=math.floor(count_minority/2))
+    
+ 
+    # print(y_test_majority)
+
+        
+    x_test = pd.concat([x_test_majority, x_test_minority], axis=0)
+    x_train = pd.concat([x_train_majority, x_train_minority], axis=0)
+    y_train = pd.concat([y_train_majority, y_train_minority], axis=0).to_numpy()
+    y_test = pd.concat([y_test_majority, y_test_minority], axis=0).to_numpy()
+   
+  
+    return x_train, x_test, y_train, y_test
+
 
 df_train = cs.loadData("train.csv")
 df_test = cs.loadData("test.csv")
