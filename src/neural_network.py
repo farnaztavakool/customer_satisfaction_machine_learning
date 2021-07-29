@@ -8,12 +8,22 @@ import customer_satisfaction as cs
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.metrics import roc_auc_score, roc_curve
-
+from data_preprocess import undersampling_dataset
 # These variales will be set during modelling
 output_dim_const = 0
 input_dim_const = 0 
 epoch_const = 0
 batch_size_const = 0
+
+def sample(train_x, train_y):
+    X_train, X_test, Y_train, Y_test = train_test_split(train_x, y_train, test_size = 0.3)
+
+    # undersample the data
+    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
+    undersampled_train = undersampling_dataset(X_train)
+    X_train = undersampled_train.drop(['TARGET'], axis=1)
+    Y_train = undersampled_train['TARGET']
+    return [X_train, Y_train, X_test, Y_test]
 
 def main():
   
@@ -21,19 +31,25 @@ def main():
     y_train = np.ravel(cs.loadData('Y_train.csv'))
     df_test = cs.loadData('X_test.csv')
     
+    # split train data into two separate sets
+    # one for training and the other one for testing
+   
+
     global_var = globals()
-    output_dim = find_best_output_size(df_train_x, y_train)
+    
+    sampled_data = sample(df_train_x, y_train)
+    output_dim = find_best_output_size(sampled_data)
     # output_dim = 125
-    global_var['input_dim_const'] = df_train_x.shape[1]
-    global_var['output_dim_const'] = output_dim
+    # global_var['input_dim_const'] = df_train_x.shape[1]
+    # global_var['output_dim_const'] = output_dim
     
  
-    print("the best number of neurons is:", output_dim_const)
+    # print("the best number of neurons is:", output_dim_const)
    
-    prediction = get_CV_prediction(df_train_x, y_train, output_dim_const, df_test)
-    write_data(prediction)
+    # prediction = get_CV_prediction(df_train_x, y_train, output_dim_const, df_test)
+    # write_data(prediction)
     
-    print('roc_auc_score: ', test_nn_model(df_train_x,y_train,output_dim))
+    # print('roc_auc_score: ', test_nn_model(df_train_x,y_train,output_dim))
 
    
 
@@ -84,16 +100,20 @@ def test_nn_model(x,y,output_dim):
 
     
 # use cross fold to find the best value for number of neurons in the hidden layer
-def find_best_output_size(x, y):
-    x = x.to_numpy()
+def find_best_output_size(sampled_data):
+    x = sampled_data[0]
+    y = sampled_data[1]
+    x_test = sampled_data[2]
+    y_test = sampled_data[3]
+    
     scores = [0] * 5
     alpha_list = [i+1 for i in range(5)]
     kfold = KFold(n_splits=5)
     for alpha in alpha_list:
         for train, test in kfold.split(x, y):
             output_dim = getNumberOfNeurons(x.shape[0], alpha,x.shape[1])
-            y_pred = fit_model(x[train],y[train],output_dim,x[test],1,1000)
-            scores[alpha-1]+=roc_auc_score(y[test],y_pred)
+            model = fit_model(x[train],y[train],output_dim,x[test],1,1000)
+            scores[alpha-1]+=roc_auc_score(y_test,model.predict_proba(x_test))
             
         scores[alpha-1] = scores[alpha-1]/5
         
