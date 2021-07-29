@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from data_preprocess import undersampling_dataset
 import customer_satisfaction as cs
 
@@ -29,25 +29,23 @@ def find_best_k_value():
     # one for training and the other one for testing
     X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
 
-    # undersample the data
-    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    undersampled_train = undersampling_dataset(X_train)
-    X_train = undersampled_train.drop(['TARGET'], axis=1)
-    Y_train = undersampled_train['TARGET']
-
     score_list = []
-    n_neighbors_grid = range(5, 51, 5)
+    n_neighbors_grid = range(200, 1001, 200)
+    kfold = KFold(n_splits=5)
     for i in n_neighbors_grid:
-        knn = KNeighborsClassifier(n_neighbors=i)
-        knn.fit(X_train, Y_train)
-        score = roc_auc_score(Y_test, knn.predict_proba(X_test)[:,1])
-        score_list.append(score)
-        print('roc_auc_score: ', score, "  number of neighbours: ", i)
+        score = 0
+        for x, y in kfold.split(X_train, Y_train):
+            knn = KNeighborsClassifier(n_neighbors=i)
+            knn.fit(x, y)
+            score += roc_auc_score(Y_test, knn.predict_proba(X_test)[:,1])
+        
+        score_list.append(score/5)
+        print('roc_auc_score: ', score/5, "  number of neighbours: ", i)
         
     plt.figure(figsize=(12, 6))
     plt.plot(n_neighbors_grid, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('roc_auc_score')
+    plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
     plt.show()

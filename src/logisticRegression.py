@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from data_preprocess import oversampling_dataset
 import matplotlib.pyplot as plt
 
@@ -20,7 +20,7 @@ def train_lgr_model():
     df_test = loadData('X_test.csv')
     
     # fit the data into the model
-    lgr = LogisticRegression()
+    lgr = LogisticRegression(C=0.5, class_weight='balanced', solver='liblinear')
     lgr.fit(df_train_x, y_train)
     
     submission = loadData('sample_submission.csv')
@@ -41,24 +41,29 @@ def find_best_solver():
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    
+    df_train_x = df_train_x.to_numpy()
     
     solver_list = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
     score_list = []
+    kfold = KFold(n_splits=5)
     for solver in solver_list:
-        # fit the data into the model
-        lgr = LogisticRegression(solver=solver)
-        lgr.fit(X_train, Y_train)
-        
-        prediction = lgr.predict_proba(X_test)[:,1]
-        roc_score = roc_auc_score(Y_test, prediction)
-        print("accuracy: ", roc_score, "  solver: ", solver)
-        score_list.append(roc_score)
+        roc_score = 0
+        for train, test in kfold.split(df_train_x, y_train):
+            # fit the data into the model
+            lgr = LogisticRegression(solver=solver)
+            lgr.fit(df_train_x[train], y_train[train])
+            
+            prediction = lgr.predict_proba(df_train_x[test])[:,1]
+            roc_score += roc_auc_score(y_train[test], prediction)
+        print("accuracy: ", roc_score/5, "  solver: ", solver)
+        score_list.append(roc_score/5)
     
     plt.figure(figsize=(12, 6))
     plt.plot(solver_list, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('ROC score')
+    plt.title('ROC score with 5-fold CV')
     plt.xlabel('solver')
     plt.ylabel('ROC score')
     plt.show()
@@ -74,24 +79,29 @@ def find_best_C():
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+    # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
     
-    c_list = list(np.linspace(0.0001, 2, 100))
+    df_train_x = df_train_x.to_numpy()
+    
+    c_list = list(np.linspace(0.0001, 2, 50))
     score_list = []
+    kfold = KFold(n_splits=5)
     for c in c_list:
-        # fit the data into the model
-        lgr = LogisticRegression(C=c, solver='liblinear')
-        lgr.fit(X_train, Y_train)
-        
-        prediction = lgr.predict_proba(X_test)[:,1]
-        roc_score = roc_auc_score(Y_test, prediction)
-        print("accuracy: ", roc_score, "  C: ", c)
-        score_list.append(roc_score)
+        roc_score = 0
+        for train, test in kfold.split(df_train_x, y_train):
+            # fit the data into the model
+            lgr = LogisticRegression(C=c, class_weight='balanced', solver='liblinear')
+            lgr.fit(df_train_x[train], y_train[train])
+            
+            prediction = lgr.predict_proba(df_train_x[test])[:,1]
+            roc_score += roc_auc_score(y_train[test], prediction)
+        print("accuracy: ", roc_score/5, "  C: ", c)
+        score_list.append(roc_score/5)
     
     plt.figure(figsize=(12, 6))
     plt.plot(c_list, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('ROC score')
+    plt.title('ROC score 5-fold CV')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
     plt.show()
@@ -115,6 +125,11 @@ def find_best_C_oversampled():
     X_train = oversampled_train.drop(['TARGET'], axis=1)
     Y_train = oversampled_train['TARGET']
     
+    X_test.insert(X_test.shape[1], 'TARGET', Y_test)
+    oversampled_test = oversampling_dataset(X_test)
+    X_test = oversampled_test.drop(['TARGET'], axis=1)
+    Y_test = oversampled_test['TARGET']
+    
     c_list = list(np.linspace(0.0001, 2, 100))
     score_list = []
     for c in c_list:
@@ -130,7 +145,7 @@ def find_best_C_oversampled():
     plt.figure(figsize=(12, 6))
     plt.plot(c_list, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('ROC score with undersampled data')
+    plt.title('ROC score with oversampled data')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
     plt.show()

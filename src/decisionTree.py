@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from data_preprocess import oversampling_dataset
 import matplotlib.pyplot as plt
 
@@ -19,7 +19,7 @@ def train_decisionTree_model():
     df_test = loadData('X_test.csv')
     
     # fit the data into the model
-    decisionTree = DecisionTreeClassifier(max_depth=20)
+    decisionTree = DecisionTreeClassifier(max_depth=7)
     decisionTree.fit(df_train_x, y_train)
     
     submission = loadData('sample_submission.csv')
@@ -39,9 +39,10 @@ def find_best_depth():
     
     # split train data into two separate sets
     # one for training and the other one for testing
-    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
-    
+    # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
+
     # oversample the data
+    '''
     X_train.insert(X_train.shape[1], 'TARGET', Y_train)
     oversampled_train = oversampling_dataset(X_train)
     X_train = oversampled_train.drop(['TARGET'], axis=1)
@@ -51,30 +52,50 @@ def find_best_depth():
     oversampled_test = oversampling_dataset(X_test)
     X_test = oversampled_test.drop(['TARGET'], axis=1)
     Y_test = oversampled_test['TARGET']
-    
+    '''
     #loss_list = []
     score_list=[]
     
-    # fit the data into the model
-    depth_grid = range(1, 100)
-    for i in depth_grid:
-        decisionTree = DecisionTreeClassifier(max_depth=i)
-        decisionTree.fit(X_train, Y_train)
+    df_train_x = df_train_x.to_numpy()
     
-        #prediction = decisionTree.predict_proba(X_test)
-        #loss = log_loss(Y_test, prediction[:, 1])
-        #print("loss: ", loss, "  depth: ", i)
-        #loss_list.append(loss)
-        
-        prediction = decisionTree.predict_proba(X_test)[:,1]
-        roc_score = roc_auc_score(Y_test, prediction)
-        print("accuracy: ", roc_score, "  depth: ", i)
-        score_list.append(roc_score)
+    # fit the data into the model
+    depth_grid = range(1, 50)
+    kfold = KFold(n_splits=5)
+    for i in depth_grid:
+        roc_score = 0
+        for train, test in kfold.split(df_train_x, y_train):
+            decisionTree = DecisionTreeClassifier(max_depth=i)
+            decisionTree.fit(df_train_x[train], y_train[train])
+            
+            prediction = decisionTree.predict_proba(df_train_x[test])[:,1]
+            roc_score += roc_auc_score(y_train[test], prediction)
+        print("accuracy: ", roc_score/5, "  depth: ", i)
+        score_list.append(roc_score/5)
     
     plt.figure(figsize=(12, 6))
     plt.plot(depth_grid, score_list, color='red', linestyle='dashed', marker='o',
             markerfacecolor='blue', markersize=10)
-    plt.title('ROC score with oversampled data')
+    plt.title("ROC score 5-fold CV with 'gini'")
+    plt.xlabel('depth')
+    plt.ylabel('ROC score')
+    plt.show()
+    
+    score_list = []
+    for i in depth_grid:
+        roc_score = 0
+        for train, test in kfold.split(df_train_x, y_train):
+            decisionTree = DecisionTreeClassifier(max_depth=i, criterion='entropy')
+            decisionTree.fit(df_train_x[train], y_train[train])
+            
+            prediction = decisionTree.predict_proba(df_train_x[test])[:,1]
+            roc_score += roc_auc_score(y_train[test], prediction)
+        print("accuracy: ", roc_score/5, "  depth: ", i)
+        score_list.append(roc_score/5)
+    
+    plt.figure(figsize=(12, 6))
+    plt.plot(depth_grid, score_list, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=10)
+    plt.title("ROC score 5-fold CV with 'entropy'")
     plt.xlabel('depth')
     plt.ylabel('ROC score')
     plt.show()
