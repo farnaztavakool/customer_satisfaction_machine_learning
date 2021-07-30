@@ -92,12 +92,12 @@ def consistent_sampling(data):
   
     return x_train.drop(columns="TARGET"), x_test.drop(columns='TARGET'), x_train['TARGET'], x_test['TARGET']
 
-def evaluate_model(model, X_test, Y_test):
+def evaluate_model(model, X_test, Y_test, model_name):
     prediction = model.predict_proba(X_test)[:,1]
     false_positive_rate, true_positive_rate, threshold1 = roc_curve(Y_test, prediction)
-    print('roc_auc_score for model: ', roc_auc_score(Y_test, prediction))
+    print('roc_auc_score for ', model_name,': ', roc_auc_score(Y_test, prediction))
 
-    plt.title('ROC - model')
+    plt.title('ROC - ' + model_name)
     plt.plot(false_positive_rate, true_positive_rate)
     plt.plot([0, 1], ls="--")
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
@@ -170,20 +170,20 @@ X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, df_train_y, test
 X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size = 0.5)
 
 ## ---------------------------------------------------------------- hypeparameter tuning -------------------------
-
-# KNN.K_value_tuning(X_val, Y_val)
-decisionTree.depth_tuning(X_val, Y_val)
-# logisticRegression.c_value_tuning(X_val, Y_val)
-
-## --------------------------------------------------------------- Train models -----------------------------------
 '''
+KNN.K_value_tuning(X_val, Y_val)
+decisionTree.depth_tuning(X_val, Y_val)
+logisticRegression.c_value_tuning(X_val, Y_val)
+'''
+## --------------------------------------------------------------- Train models -----------------------------------
+
 # KNN model
-knn = KNeighborsClassifier(n_neighbors=20)
+knn = KNeighborsClassifier(n_neighbors=20, weights='distance')
 knn.fit(X_train, Y_train)
 
 
 # decision tree model
-dt = DecisionTreeClassifier(max_depth=7)
+dt = DecisionTreeClassifier(max_depth=7, class_weight='balanced', criterion='entropy')
 dt.fit(X_train, Y_train)
 
 
@@ -197,11 +197,11 @@ lgr.fit(X_train, Y_train)
 
 ## --------------------------------------------------------------- model analysis -----------------------------------
 
-evaluate_model(knn, X_test, Y_test)
+evaluate_model(knn, X_test, Y_test, 'knn')
 
-evaluate_model(dt, X_test, Y_test)
+evaluate_model(dt, X_test, Y_test, 'decision tree')
 
-evaluate_model(lgr, X_test, Y_test)
+evaluate_model(lgr, X_test, Y_test, 'logistic regression')
 ## --------------------------------------------------------------- assemble models -----------------------------------
 
 knn_prediction = knn.predict_proba(df_test)[:,1]
@@ -210,11 +210,10 @@ dt_prediction = dt.predict_proba(df_test)[:,1]
 
 lgr_prediction = lgr.predict_proba(df_test)[:,1]
 
+target = knn_prediction * 0.2 + dt_prediction * 0.4 + lgr_prediction * 0.4
 
 ## --------------------------------------------------------------- Final result/ submission --------------------------
 
 submission = loadData('sample_submission.csv')
-submission['TARGET'] = target[:,1]
-submission.to_csv('submission_KNN.csv', index=False)
-'''
-
+submission['TARGET'] = target
+submission.to_csv('submission_final.csv', index=False)
