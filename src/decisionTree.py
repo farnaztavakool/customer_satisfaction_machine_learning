@@ -102,13 +102,7 @@ def find_best_depth():
     plt.savefig('images/tree_score.png', bbox_inches='tight')
     return
 
-def accuracy_score(Y_true, Y_predict):
-    count = 0.0
-    for i in range(-1, len(Y_true)):
-        if Y_true[i] == Y_predict[i]:
-            count +=1
-    
-    return count/len(Y_true)
+
 
 def test_decisionTree():
     # read the data
@@ -140,13 +134,57 @@ def test_decisionTree():
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    # plt.show()
-    plt.savefig('images/tree_test.png', bbox_inches='tight')
+    plt.show()
     
     plot_confusion_matrix(decisionTree, X_test, Y_test)
-    # plt.show()
-    plt.savefig('images/tree_cm.png', bbox_inches='tight')
+    plt.show()
     
     return
 
-test_decisionTree()
+def depth_tuning(X_validation, Y_validation):
+    X_validation = X_validation.to_numpy()
+    
+    score_list=[]
+    # fit the data into the model
+    depth_grid = range(1, 50)
+    kfold = KFold(n_splits=5)
+    for i in depth_grid:
+        roc_score = 0
+        for train, test in kfold.split(X_validation, Y_validation):
+            decisionTree = DecisionTreeClassifier(max_depth=i, class_weight='balanced')
+            decisionTree.fit(X_validation[train], Y_validation[train])
+            
+            prediction = decisionTree.predict_proba(X_validation[test])[:,1]
+            roc_score += roc_auc_score(Y_validation[test], prediction)
+        print("accuracy: ", roc_score/5, "  depth: ", i)
+        score_list.append(roc_score/5)
+    
+    plt.figure(figsize=(12, 6))
+    plt.plot(depth_grid, score_list, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=10)
+    plt.title("ROC score 5-fold CV with 'gini' balanced")
+    plt.xlabel('depth')
+    plt.ylabel('ROC score')
+    plt.show()
+    
+    score_list = []
+    for i in depth_grid:
+        roc_score = 0
+        for train, test in kfold.split(X_validation, Y_validation):
+            decisionTree = DecisionTreeClassifier(max_depth=i, criterion='entropy', class_weight='balanced')
+            decisionTree.fit(X_validation[train], Y_validation[train])
+            
+            prediction = decisionTree.predict_proba(X_validation[test])[:,1]
+            roc_score += roc_auc_score(Y_validation[test], prediction)
+        print("accuracy: ", roc_score/5, "  depth: ", i)
+        score_list.append(roc_score/5)
+    
+    plt.figure(figsize=(12, 6))
+    plt.plot(depth_grid, score_list, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=10)
+    plt.title("ROC score 5-fold CV with 'entropy' balanced")
+    plt.xlabel('depth')
+    plt.ylabel('ROC score')
+    plt.show()
+    return
+

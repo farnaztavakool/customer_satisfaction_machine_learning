@@ -66,47 +66,25 @@ def train_KNN_model():
     # save the model
     joblib.dump(knn, 'model_KNN.joblib')
     
-def test_KNN_model():
-    df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(cs.loadData('Y_train.csv'))
-    df_test = cs.loadData('X_test.csv')
-    
-    # split train data into two separate sets
-    # one for training and the other one for testing
-    X_train = df_train_x[0 : 10000]
-    Y_train = y_train[0 : 10000]
-    X_test = df_train_x[10000 : 15000]
-    Y_test = y_train[10000 : 15000]
-    
-    knn = KNeighborsClassifier(n_neighbors=400)
-    knn.fit(X_train, Y_train)
-    predict = knn.predict_proba(X_test)
-    loss = log_loss(Y_test, predict)
-    score = knn.score(X_test, Y_test)
-    print(predict[:,1])
-    print('loss: ', loss)
-    print('score: ',score)
-    
-    joblib.dump(knn, 'model_KNN.joblib')
-    
-def test_load_model():
-    df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(cs.loadData('Y_train.csv'))
-    df_test = cs.loadData('X_test.csv')
-    
-    # split train data into two separate sets
-    # one for training and the other one for testing
-    X_train = df_train_x[0 : 10000]
-    Y_train = y_train[0 : 10000]
-    X_test = df_train_x[10000 : 15000]
-    Y_test = y_train[10000 : 15000]
-    
-    knn = joblib.load('model_KNN.joblib')
-    predict = knn.predict_proba(X_test)
-    #loss = log_loss(Y_test, predict)
-    score = knn.score(X_test, Y_test)
-    print(predict[:,1])
-    #print('loss: ', loss)
-    print('score: ',score)
-    
-find_best_k_value()
+def K_value_tuning(X_validation, Y_validation):
+    X_validation = X_validation.to_numpy()
+    score_list = []
+    n_neighbors_grid = range(20, 1001, 20)
+    kfold = KFold(n_splits=5)
+    for i in n_neighbors_grid:
+        score = 0
+        for train, test in kfold.split(X_validation, Y_validation):
+            knn = KNeighborsClassifier(n_neighbors=i, weights='distance')
+            knn.fit(X_validation[train], Y_validation[train])
+            score += roc_auc_score(Y_validation[test], knn.predict_proba(X_validation[test])[:,1])
+        
+        score_list.append(score/5)
+        print('roc_auc_score: ', score/5, "  number of neighbours: ", i)
+        
+    plt.figure(figsize=(12, 6))
+    plt.plot(n_neighbors_grid, score_list, color='red', linestyle='dashed', marker='o',
+            markerfacecolor='blue', markersize=10)
+    plt.title('roc_auc_score with 5-fold CV')
+    plt.xlabel('number of neighbors')
+    plt.ylabel('score')
+    plt.show()

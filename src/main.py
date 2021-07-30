@@ -1,8 +1,22 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, VarianceThreshold
 from sklearn.tree import DecisionTreeClassifier
 from feature_engine.selection import DropCorrelatedFeatures
+from sklearn.utils import resample
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
+import matplotlib.pyplot as plt
+import math
+import random
+
+
+import KNN
+import decisionTree
+import logisticRegression
 
 def loadData(path):
     return pd.DataFrame(pd.read_csv(path))
@@ -46,8 +60,53 @@ def normalise(data):
     scaler = StandardScaler()
     return pd.DataFrame(scaler.fit_transform(data))
 
+'''
+1) getting half of unsatisfied
+2) getting half of satisfied 
+3) concatenating them to have a representative sample
+'''
+def consistent_sampling(data):
+    
+    count_majority, count_minority = data['TARGET'].value_counts()
+    data_majority=data[data.TARGET==0] 
+    data_minority=data[data.TARGET==1] 
 
+ 
+    x_train_majority, x_test_majority, y_train_majority, y_test_majority = train_test_split(data_majority.drop(['TARGET'],axis=1), data_majority['TARGET'],train_size=math.floor(count_majority/2))
+    x_train_minority, x_test_minority, y_train_minority, y_test_minority = train_test_split(data_minority.drop(['TARGET'],axis=1), data_minority['TARGET'],train_size=math.floor(count_minority/2))
+    
 
+    size = math.floor(count_majority/2) + math.floor(count_minority/2)
+    x_test = pd.concat([x_test_majority, x_test_minority], axis=0).reset_index(drop=True)
+    x_train = pd.concat([x_train_majority, x_train_minority], axis=0)
+    y_train = pd.concat([y_train_majority, y_train_minority], axis=0).to_numpy()
+    y_test = pd.concat([y_test_majority, y_test_minority], axis=0).to_numpy()
+    
+    x_train.insert(x_train.shape[1], 'TARGET', y_train)
+    x_test.insert(x_test.shape[1], 'TARGET', y_test)
+    
+    x_train.sample(frac=1)
+    x_test.sample(frac=1)
+    
+    
+  
+    return x_train.drop(columns="TARGET"), x_test.drop(columns='TARGET'), x_train['TARGET'], x_test['TARGET']
+
+def evaluate_model(model, X_test, Y_test):
+    prediction = model.predict_proba(X_test)[:,1]
+    false_positive_rate, true_positive_rate, threshold1 = roc_curve(Y_test, prediction)
+    print('roc_auc_score for model: ', roc_auc_score(Y_test, prediction))
+
+    plt.title('ROC - model')
+    plt.plot(false_positive_rate, true_positive_rate)
+    plt.plot([0, 1], ls="--")
+    plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
+
+    plot_confusion_matrix(model, X_test, Y_test)
+    plt.show()
 
 ## --------------------------------------------------------------load data-------------------------------------------
 df_train = loadData("train.csv")
@@ -78,7 +137,7 @@ df_train_x = correlated[0]
 df_test = correlated[1]
 
 ## ---------------------------------------------------------------feature selection------------------------------
-# use ANOVA to select k best features, the number of features is a hyperparameter which we need to test to find a best one
+# use ANOVA to select k best features
 num_features_ANOVA = 100
 df_train_x, df_test = featureSelectionANOVA(df_train_x, df_train_y, df_test, num_features_ANOVA)
 
@@ -87,12 +146,75 @@ estimator = DecisionTreeClassifier()
 num_features_RFE = 70
 df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, num_features_RFE, estimator)
 
+#estimator = LogisticRegression(penalty='l1', solver='liblinear')
+#df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, 5, estimator)
 
 df_train_x = normalise(df_train_x)
+df_train_y = np.ravel(df_train_y)
 df_test = normalise(df_test)
 
+## ---------------------------------------------------------------- split data -----------------------------------
+
+# split data into train set, validation set and test set as 2:1:1
+'''
+df_train_x.insert(df_train_x.shape[1], 'TARGET', df_train_y)
+X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
+
+X_test.insert(X_test.shape[1], 'TARGET', Y_test)
+X_validation, X_test, Y_validation, Y_test = consistent_sampling(X_test)
+
+print(Y_validation)
+'''
+X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, df_train_y, test_size = 0.5)
+
+X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size = 0.5)
+
+## ---------------------------------------------------------------- hypeparameter tuning -------------------------
+
+# KNN.K_value_tuning(X_val, Y_val)
+decisionTree.depth_tuning(X_val, Y_val)
+# logisticRegression.c_value_tuning(X_val, Y_val)
+
+## --------------------------------------------------------------- Train models -----------------------------------
+'''
+# KNN model
+knn = KNeighborsClassifier(n_neighbors=20)
+knn.fit(X_train, Y_train)
 
 
+# decision tree model
+dt = DecisionTreeClassifier(max_depth=7)
+dt.fit(X_train, Y_train)
 
 
+# logistic regression model
+lgr = LogisticRegression(C=0.05, class_weight='balanced', solver='liblinear')
+lgr.fit(X_train, Y_train)
+
+
+# neural network model
+
+
+## --------------------------------------------------------------- model analysis -----------------------------------
+
+evaluate_model(knn, X_test, Y_test)
+
+evaluate_model(dt, X_test, Y_test)
+
+evaluate_model(lgr, X_test, Y_test)
+## --------------------------------------------------------------- assemble models -----------------------------------
+
+knn_prediction = knn.predict_proba(df_test)[:,1]
+
+dt_prediction = dt.predict_proba(df_test)[:,1]
+
+lgr_prediction = lgr.predict_proba(df_test)[:,1]
+
+
+## --------------------------------------------------------------- Final result/ submission --------------------------
+
+submission = loadData('sample_submission.csv')
+submission['TARGET'] = target[:,1]
+submission.to_csv('submission_KNN.csv', index=False)
+'''
 
