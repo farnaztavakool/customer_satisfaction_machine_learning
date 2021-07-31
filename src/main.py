@@ -10,10 +10,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss, plot_confusion_matrix, roc_auc_score, roc_curve
 import matplotlib.pyplot as plt
+from keras.wrappers.scikit_learn import KerasClassifier
+from neural_network import get_CV_prediction, build_model
 import math
 import random
-
-
 import KNN
 import decisionTree
 import logisticRegression
@@ -93,7 +93,10 @@ def consistent_sampling(data):
     return x_train.drop(columns="TARGET"), x_test.drop(columns='TARGET'), x_train['TARGET'], x_test['TARGET']
 
 def evaluate_model(model, X_test, Y_test, model_name):
-    prediction = model.predict_proba(X_test)[:,1]
+    if (model_name == 'Neural Network'):
+        prediction = model.predict_proba(X_test).ravel()
+    else :
+        prediction = model.predict_proba(X_test)[:,1]
     false_positive_rate, true_positive_rate, threshold1 = roc_curve(Y_test, prediction)
     print('roc_auc_score for ', model_name,': ', roc_auc_score(Y_test, prediction))
 
@@ -104,9 +107,9 @@ def evaluate_model(model, X_test, Y_test, model_name):
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     plt.show()
-
-    plot_confusion_matrix(model, X_test, Y_test)
-    plt.show()
+    if(model_name != 'Neural Network'):
+        plot_confusion_matrix(model, X_test, Y_test)
+        plt.show()
 
 ## --------------------------------------------------------------load data-------------------------------------------
 df_train = loadData("train.csv")
@@ -177,7 +180,8 @@ logisticRegression.c_value_tuning(X_val, Y_val)
 '''
 ## --------------------------------------------------------------- Train models -----------------------------------
 
-# KNN model
+
+#KNN model
 knn = KNeighborsClassifier(n_neighbors=20, weights='distance')
 knn.fit(X_train, Y_train)
 
@@ -193,8 +197,8 @@ lgr.fit(X_train, Y_train)
 
 
 # neural network model
-
-
+nn = build_model(X_train.shape[1], 167,0.001,0.0)
+nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
 ## --------------------------------------------------------------- model analysis -----------------------------------
 
 evaluate_model(knn, X_test, Y_test, 'knn')
@@ -202,6 +206,9 @@ evaluate_model(knn, X_test, Y_test, 'knn')
 evaluate_model(dt, X_test, Y_test, 'decision tree')
 
 evaluate_model(lgr, X_test, Y_test, 'logistic regression')
+
+evaluate_model(nn, X_test, Y_test, 'Neural Network')
+
 ## --------------------------------------------------------------- assemble models -----------------------------------
 
 knn_prediction = knn.predict_proba(df_test)[:,1]
@@ -210,7 +217,10 @@ dt_prediction = dt.predict_proba(df_test)[:,1]
 
 lgr_prediction = lgr.predict_proba(df_test)[:,1]
 
+nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0},df_test,167)
+
 target = knn_prediction * 0.2 + dt_prediction * 0.4 + lgr_prediction * 0.4
+
 
 ## --------------------------------------------------------------- Final result/ submission --------------------------
 
