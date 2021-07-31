@@ -8,7 +8,6 @@ import customer_satisfaction as cs
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import LearningRateScheduler
-from keras.optimizers import Adam
 from sklearn.metrics import roc_auc_score, roc_curve
 from data_preprocess import consistent_sampling
 from keras.optimizers import Adam
@@ -18,7 +17,7 @@ from keras.layers import Dropout
 output_dim_const = 0
 input_dim_const = 0 
 epoch_const = 20
-batch_size_const = 10000
+batch_size_const = 10000git 
 learn_rate_const = 0.1
 dropout_const = 0
 
