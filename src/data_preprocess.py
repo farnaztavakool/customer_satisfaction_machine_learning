@@ -3,7 +3,11 @@ import customer_satisfaction as cs
 import pandas as pd
 from sklearn.utils import resample
 import math
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.metrics import plot_confusion_matrix, roc_auc_score, roc_curve
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+import matplotlib.pyplot as plt
 
 def preprocessData(df_train, df_test):
 
@@ -57,10 +61,9 @@ def oversampling_dataset(data):
 def undersampling_dataset(data):
     count_majority, count_minority = data['TARGET'].value_counts()
     
-    data_majority=data[data.TARGET==0] 
-    data_minority=data[data.TARGET==1]  
-    print(data_majority, data_minority)
-    
+    data_majority=data[data.TARGET==0]
+    data_minority=data[data.TARGET==1]
+
     data_majority_under = data_majority.sample(count_minority)
     data_underampled=pd.concat([data_majority_under,data_minority])
 
@@ -82,8 +85,6 @@ def consistent_sampling(data):
     x_train_majority, x_test_majority, y_train_majority, y_test_majority = train_test_split(data_majority.drop(['TARGET'],axis=1), data_majority['TARGET'],train_size=math.floor(count_majority/2))
     x_train_minority, x_test_minority, y_train_minority, y_test_minority = train_test_split(data_minority.drop(['TARGET'],axis=1), data_minority['TARGET'],train_size=math.floor(count_minority/2))
     
- 
-    # print(y_test_majority)
 
     size = math.floor(count_majority/2) + math.floor(count_minority/2)
     x_test = pd.concat([x_test_majority, x_test_minority], axis=0).reset_index(drop=True)
@@ -104,5 +105,4 @@ ID_test = df_test["ID"].copy()
 df_train = df_train.drop(columns = "ID")
 df_test = df_test.drop(columns = "ID")
 
-preprocessData(df_train, df_test)
 

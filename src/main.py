@@ -178,12 +178,12 @@ logisticRegression.c_value_tuning(X_val, Y_val)
 ## --------------------------------------------------------------- Train models -----------------------------------
 
 # KNN model
-knn = KNeighborsClassifier(n_neighbors=20, weights='distance')
+knn = KNeighborsClassifier(n_neighbors=250, weights='distance')
 knn.fit(X_train, Y_train)
 
 
 # decision tree model
-dt = DecisionTreeClassifier(max_depth=7, class_weight='balanced', criterion='entropy')
+dt = DecisionTreeClassifier(max_depth=5, class_weight='balanced', criterion='entropy')
 dt.fit(X_train, Y_train)
 
 
