@@ -149,9 +149,6 @@ estimator = DecisionTreeClassifier()
 num_features_RFE = 70
 df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, num_features_RFE, estimator)
 
-#estimator = LogisticRegression(penalty='l1', solver='liblinear')
-#df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, 5, estimator)
-
 df_train_x = normalise(df_train_x)
 df_train_y = np.ravel(df_train_y)
 df_test = normalise(df_test)
@@ -199,7 +196,7 @@ lgr.fit(X_train, Y_train)
 nn = build_model(X_train.shape[1], 167,0.001,0.0)
 nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
 ## --------------------------------------------------------------- model analysis -----------------------------------
-
+'''
 evaluate_model(knn, X_test, Y_test, 'knn')
 
 evaluate_model(dt, X_test, Y_test, 'decision tree')
@@ -207,7 +204,7 @@ evaluate_model(dt, X_test, Y_test, 'decision tree')
 evaluate_model(lgr, X_test, Y_test, 'logistic regression')
 
 evaluate_model(nn, X_test, Y_test, 'Neural Network')
-
+'''
 ## --------------------------------------------------------------- assemble models -----------------------------------
 
 knn_prediction = knn.predict_proba(df_test)[:,1]
@@ -218,7 +215,7 @@ lgr_prediction = lgr.predict_proba(df_test)[:,1]
 
 nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0},df_test,167)
 
-target = knn_prediction * 0.2 + dt_prediction * 0.4 + lgr_prediction * 0.4
+target = knn_prediction * 0.25 + dt_prediction * 0.25 + lgr_prediction * 0.25 + nn_prediction * 0.25
 
 
 ## --------------------------------------------------------------- Final result/ submission --------------------------
