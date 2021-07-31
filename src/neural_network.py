@@ -17,7 +17,7 @@ from keras.layers import Dropout
 output_dim_const = 0
 input_dim_const = 0 
 epoch_const = 20
-batch_size_const = 10000git 
+batch_size_const = 10000
 learn_rate_const = 0.1
 dropout_const = 0
 
