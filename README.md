@@ -40,6 +40,7 @@ because we are using deep learning we included  jupyter notebooks that have cach
 2) Then run data_preprocess.py
 > python3 data_preprocess.py
 
+
 3) Use the following command to run the main file
 > python3 run.py main
 
@@ -74,8 +75,6 @@ because we are using deep learning we included  jupyter notebooks that have cach
 > python3 data_preprocess.py  
 3) run main.py
 > python3 main.py 
-
-
 
 
 
