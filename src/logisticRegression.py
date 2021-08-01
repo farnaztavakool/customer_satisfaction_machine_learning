@@ -30,14 +30,13 @@ def train_lgr_model():
     
     # save the model
     joblib.dump(lgr, 'model_lgr.joblib')
-    return
+    
 
 def find_best_solver():
     # read the data
     df_train_x = loadData('X_train.csv')
     y_train = np.ravel(loadData('Y_train.csv'))
     df_test = loadData('X_test.csv')
-    
     
     # split train data into two separate sets
     # one for training and the other one for testing
@@ -69,14 +68,12 @@ def find_best_solver():
     # plt.show()
     plt.savefig('images/regression_s.png', bbox_inches='tight')
     
-    return
 
 def find_best_C():
     # read the data
     df_train_x = loadData('X_train.csv')
     y_train = np.ravel(loadData('Y_train.csv'))
     df_test = loadData('X_test.csv')
-    
     
     # split train data into two separate sets
     # one for training and the other one for testing
@@ -105,10 +102,8 @@ def find_best_C():
     plt.title('ROC score 5-fold CV')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    # plt.show()
     plt.savefig('images/regression_c1.png', bbox_inches='tight')
     
-    return
 
 def c_value_tuning(X_validation, Y_validation):
     X_validation = X_validation.to_numpy()

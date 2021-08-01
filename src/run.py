@@ -4,6 +4,7 @@ import decisionTree
 import KNN
 import logisticRegression
 import neural_network
+import EDA
 import main as m
 
 ip = 'Invalid #parameter'
@@ -13,11 +14,13 @@ isf = 'Invalid shortcut for <function>'
 if __name__ == "__main__":
     if not os.path.exists('images'):
         os.makedirs('images')
+    if not os.path.exists('eda'):
+        os.makedirs('eda')
     
     if (len(sys.argv) == 1):
         print('Usage: python3 run.py <file> <function> <parameters>')
         print('Shortcut for <file> as follow:')
-        print('> main: The main file\n> knn: KNN\n> tree: DecisionTree\n> log: LogisticRegression\n> net: NeuralNetwork')
+        print('> main: Run the main file\n> knn: KNN functions\n> tree: DecisionTree functions\n> log: LogisticRegression functions\n> net: Run NeuralNetwork\n> eda: Exploratory-Data-Analysis for Santander Bank')
     elif (len(sys.argv) == 2):
         if sys.argv[1] == 'main':
             m.main()
@@ -29,6 +32,8 @@ if __name__ == "__main__":
             print('Shortcut for <function> as follow:\n> train_lgr_model\n> find_best_solver\n> find_best_C\n> c_value_tuning <X_validation> <Y_validation>')
         elif sys.argv[1] == 'net':
             neural_network.main()
+        elif sys.argv[1] == 'eda':
+            EDA.main()
         else:
             print('Invalid shortcut for <file>')
     elif (len(sys.argv) > 2):
