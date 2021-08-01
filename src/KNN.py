@@ -1,13 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#from sklearn.externals import joblib
 import joblib
 from sklearn.metrics import plot_confusion_matrix, roc_auc_score, roc_curve
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import KFold, train_test_split
-# from sklearn.model_selection import train_test_split
 from data_preprocess import consistent_sampling
-# undersampling_dataset, 
 import data_preprocess as pp
 
 def find_best_k_value():

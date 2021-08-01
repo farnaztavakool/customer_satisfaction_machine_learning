@@ -36,12 +36,7 @@ def find_best_depth():
     df_train_x = loadData('X_train.csv')
     y_train = np.ravel(loadData('Y_train.csv'))
     df_test = loadData('X_test.csv')
-    
-    # split train data into two separate sets
-    # one for training and the other one for testing
-    # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
 
-    #loss_list = []
     score_list=[]
     
     df_train_x = df_train_x.to_numpy()
