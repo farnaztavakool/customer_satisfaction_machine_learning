@@ -3,6 +3,7 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
+# Exploratory Data Analysis for Santander Bank
 
 df_train = pd.read_csv("train.csv")
 df_test = pd.read_csv("test.csv")
