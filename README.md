@@ -1,4 +1,17 @@
 # customer_satisfaction_machine_learning
+
+# Customer Satisfaction Model for Santander Bank
+
+Our project was chosen from a Kaggle competition: https://www.kaggle.com/c/santander-customer-satisfaction
+
+Our aim for this project is to build a set of models to classify whether a customer is satisfied or dissatisfied with Santander Bank. 
+
+# Files provided by the Challenge
+
+We were provided with a train.csv and test.csv data file. 
+
+All the features in the dataset are fully anonymized, leaving the TARGET variable with values of 0 and 1 where 1 indicates an unhappy customer, and 0 indicates a satisfied customer. 
+
 # Dependencies
 1) Python3 and pip3 are required to run the code.
 2) Install the dependencies by typing 'pip3 install -r requirements.txt'.
