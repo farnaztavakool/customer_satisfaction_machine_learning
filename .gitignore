@@ -8,3 +8,4 @@ src/Y_train.csv
 src/submission.csv
 src/submission_*.csv
 src/model_*.joblib
+.ipynb_checkpoints
