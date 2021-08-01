@@ -78,7 +78,7 @@ def find_best_depth():
     plt.title("ROC score 5-fold CV with 'gini'")
     plt.xlabel('depth')
     plt.ylabel('ROC score')
-    plt.show()
+    plt.savefig('images/tree_gini.png', bbox_inches='tight')
     
     score_list = []
     for i in depth_grid:
@@ -99,7 +99,7 @@ def find_best_depth():
     plt.xlabel('depth')
     plt.ylabel('ROC score')
     # plt.show()
-    plt.savefig('images/tree_score.png', bbox_inches='tight')
+    plt.savefig('images/tree_entropy.png', bbox_inches='tight')
     return
 
 
@@ -134,10 +134,10 @@ def test_decisionTree():
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    plt.show()
+    plt.savefig('images/tree_test.png', bbox_inches='tight')
     
     plot_confusion_matrix(decisionTree, X_test, Y_test)
-    plt.show()
+    plt.savefig('images/tree_confusionMatrix.png', bbox_inches='tight')
     
     return
 
@@ -165,7 +165,7 @@ def depth_tuning(X_validation, Y_validation):
     plt.title("ROC score 5-fold CV with 'gini' balanced")
     plt.xlabel('depth')
     plt.ylabel('ROC score')
-    plt.show()
+    plt.savefig('images/tree_gini_balanced.png', bbox_inches='tight')
     
     score_list = []
     for i in depth_grid:
@@ -185,6 +185,6 @@ def depth_tuning(X_validation, Y_validation):
     plt.title("ROC score 5-fold CV with 'entropy' balanced")
     plt.xlabel('depth')
     plt.ylabel('ROC score')
-    plt.show()
+    plt.savefig('images/tree_entropy_balanced.png', bbox_inches='tight')
     return
 
