@@ -45,7 +45,7 @@ def main():
     
     
     print("Getting the final prediction")
-    prediction = get_CV_prediction(df_train_x, y_train, best_params, df_test)
+    prediction = get_CV_prediction(df_train_x, y_train, best_params, df_test,output_dim_const)
   
     print("writting the data into NN_output.csv")
     write_data(prediction)
