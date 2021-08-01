@@ -43,7 +43,7 @@ because we are using deep learning we included  jupyter notebooks that have cach
 4) to run the models seperately do the following steps:
 * python3 run.py     (This will display the following options)
 * choose the model and run python3 run.py model
-> Example: pythone run.py neural_network
+> Example: python3 run.py neural_network
 ## How to run after installing the dependencies (original method)
 
 1) first change to src folder 
