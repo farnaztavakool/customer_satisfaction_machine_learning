@@ -29,5 +29,3 @@ def essemble_model():
     submission = loadData('sample_submission.csv')
     submission['TARGET'] = final_prediction
     submission.to_csv('submission_essemble.csv', index=False)
-    
-essemble_model()
