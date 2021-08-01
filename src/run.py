@@ -7,6 +7,7 @@ import decisionTree
 import KNN
 import logisticRegression
 import neural_network
+import main as m
 
 ip = 'Invalid #parameter'
 isf = 'Invalid shortcut for <function>'
@@ -19,9 +20,11 @@ if __name__ == "__main__":
     if (len(sys.argv) == 1):
         print('Usage: python3 run.py <file> <function> <parameters>')
         print('Shortcut for <file> as follow:')
-        print('> knn: KNN\n> tree: DecisionTree\n> log: LogisticRegression\n> net: NeuralNetwork> da: data_analysis\n> dp: data_preprocess\n> e: essemble')
+        print('>main: The main file\n> knn: KNN\n> tree: DecisionTree\n> log: LogisticRegression\n> net: NeuralNetwork> da: data_analysis\n> dp: data_preprocess\n> e: essemble')
     elif (len(sys.argv) == 2):
-        if sys.argv[1] == 'knn':
+        if sys.argv[1] == 'main':
+            m.main()
+        elif sys.argv[1] == 'knn':
             print('Shortcut for <function> as follow:\n> find_best_k_value\n> train_KNN_model\n> K_value_tuning <X_validation> <Y_validation>')
         elif sys.argv[1] == 'tree':
             print('Shortcut for <function> as follow:\n> train_decisionTree_model\n> find_best_depth\n> test_decisionTree\n> depth_tuning <X_validation> <Y_validation>')
