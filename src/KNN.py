@@ -16,7 +16,7 @@ def find_best_k_value():
    
     X_train = X_train.to_numpy()
     score_list = []
-    n_neighbors_grid = range(200, 1001, 200)
+    n_neighbors_grid = range(20, 1001, 20)
     kfold = KFold(n_splits=5)
     for i in n_neighbors_grid:
         score = 0
