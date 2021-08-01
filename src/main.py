@@ -185,7 +185,7 @@ def main():
 
 
     # neural network model
-    nn = build_model(X_train.shape[1], 167,0.001,0.0)
+    nn = build_model(X_train.shape[1], 535,0.001,0.0)
     nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
     ## --------------------------------------------------------------- model analysis -----------------------------------
     
@@ -205,7 +205,7 @@ def main():
 
     lgr_prediction = lgr.predict_proba(df_test)[:,1]
 
-    nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0},df_test,167)
+    nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0.1},df_test,535)
 
     target = knn_prediction * 0.25 + dt_prediction * 0.25 + lgr_prediction * 0.25 + nn_prediction * 0.25
 
