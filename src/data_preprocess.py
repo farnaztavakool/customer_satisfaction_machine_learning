@@ -96,13 +96,14 @@ def consistent_sampling(data):
     return x_train, x_test, y_train, y_test
 
 
-df_train = cs.loadData("train.csv")
-df_test = cs.loadData("test.csv")
+def main():
+    df_train = cs.loadData("train.csv")
+    df_test = cs.loadData("test.csv")
 
-# dropping "ID" from both training and test data
-ID_train = df_train["ID"].copy()
-ID_test = df_test["ID"].copy()
-df_train = df_train.drop(columns = "ID")
-df_test = df_test.drop(columns = "ID")
+    # dropping "ID" from both training and test data
+    ID_train = df_train["ID"].copy()
+    ID_test = df_test["ID"].copy()
+    df_train = df_train.drop(columns = "ID")
+    df_test = df_test.drop(columns = "ID")
 
 
