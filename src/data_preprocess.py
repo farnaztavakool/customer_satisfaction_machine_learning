@@ -83,7 +83,7 @@ def preprocessData(df_train, df_test):
 
     return [df_train_x, y_train, df_test]
 
-def main():
-    df_train = pd.read_csv("train.csv")
-    df_test = pd.read_csv("test.csv")
-    preprocessData(df_train, df_test)
+
+df_train = pd.read_csv("train.csv")
+df_test = pd.read_csv("test.csv")
+preprocessData(df_train, df_test)
