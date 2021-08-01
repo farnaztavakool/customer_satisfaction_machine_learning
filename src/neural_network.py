@@ -22,6 +22,40 @@ learn_rate_const = 0.1
 dropout_const = 0
 
 
+def main():
+  
+    df_train_x = cs.loadData('X_train.csv')
+    y_train = np.ravel(cs.loadData('Y_train.csv'))
+    df_test = cs.loadData('X_test.csv')
+    
+    print("Sampling the data for NN")
+    df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
+    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
+  
+    df_train_x = df_train_x.drop(['TARGET'], axis=1)
+  
+    print("Finding number of neurons for NN")
+    global_var = globals()
+    
+    output_dim = find_best_output_size(X_train, Y_train, X_test, Y_test)
+    
+    global_var['input_dim_const'] = df_train_x.shape[1]
+    global_var['output_dim_const'] = output_dim
+    
+    print("gridsearch to find the best params")
+    best_params = tune(X_train,Y_train)
+    
+    
+    print("Getting the final prediction")
+    prediction = get_CV_prediction(df_train_x, y_train, best_params, df_test)
+  
+    print("writting the data into NN_output.csv")
+    write_data(prediction)
+    
+    print("getting the AUC socre")
+    print("AUC score: ", test_nn_model(X_train, Y_train, X_test,Y_test,output_dim))
+
+
 def tune(x,y):
     dropout_rate = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     learn_rate = [0.001,0.01,0.1] 
