@@ -126,10 +126,9 @@ def get_CV_prediction(x, y, best_params, test_data, output_dim):
     plt.title('model loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
-    plt.show()
+    plt.savefig('images/network_prediction.png', bbox_inches='tight')
     return prediction
 
 # get the number of nurons
 def getNumberOfNeurons(observation_size,alpha, input_size ):
     return math.floor(observation_size/(alpha*(input_size+1)))
-main()
