@@ -10,8 +10,7 @@
 4) In general, type 'python3 run.py main' to run everything
 5) Plots are stored under 'src/images' if after running with run.py
 
-## current outuput
-<img width="568" alt="image" src="https://user-images.githubusercontent.com/60339514/126883739-089cd32e-9daf-4b0f-a00e-6e1fcb2a5e41.png">
+
 
 
 ## data analysis:
