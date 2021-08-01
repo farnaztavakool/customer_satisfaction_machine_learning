@@ -1,8 +1,5 @@
 import os
 import sys
-import data_analysis
-import data_preprocess
-import essemble
 import decisionTree
 import KNN
 import logisticRegression
@@ -20,7 +17,7 @@ if __name__ == "__main__":
     if (len(sys.argv) == 1):
         print('Usage: python3 run.py <file> <function> <parameters>')
         print('Shortcut for <file> as follow:')
-        print('>main: The main file\n> knn: KNN\n> tree: DecisionTree\n> log: LogisticRegression\n> net: NeuralNetwork> da: data_analysis\n> dp: data_preprocess\n> e: essemble')
+        print('> main: The main file\n> knn: KNN\n> tree: DecisionTree\n> log: LogisticRegression\n> net: NeuralNetwork')
     elif (len(sys.argv) == 2):
         if sys.argv[1] == 'main':
             m.main()
@@ -32,12 +29,6 @@ if __name__ == "__main__":
             print('Shortcut for <function> as follow:\n> train_lgr_model\n> find_best_solver\n> find_best_C\n> c_value_tuning <X_validation> <Y_validation>')
         elif sys.argv[1] == 'net':
             neural_network.main()
-        elif sys.argv[1] == 'da':
-            data_analysis.main()
-        elif sys.argv[1] == 'dp':
-            data_preprocess.main()
-        elif sys.argv[1] == 'e':
-            essemble.essemble_model()
         else:
             print('Invalid shortcut for <file>')
     elif (len(sys.argv) > 2):
