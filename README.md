@@ -1,13 +1,11 @@
 # customer_satisfaction_machine_learning
 ## How to run 
-1) you can install the dependencies with pip3 install -r requirements.txt
-2) you can type 'python3 run.py' in terminal to run 4 models
-3) code-name for KNN model is k
-4) code-name neural_network model is n
-5) code-name logisticRegression model is r
-6) code-name decisionTree model is t
-7) you can run the model or models by include their code-name 'k/n/r/t' in the argument. eg. python3 run.py k r
-8) if there is keras import error, change the import 'keras' with 'tensorflow.keras'  
+1) you can install the dependencies by typing 'pip3 install -r requirements.txt'
+2) if there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
+3) you can type 'python3 run.py <file> <function> <parameter_1> <parameter_2>' in terminal to run code seperately.
+4) Type 'python3 run.py' will show the Usage
+5) In general, type 'python3 run.py main' to run everything
+6) Plots are stored under 'src/images' if after running with run.py
 
 ## current outuput
 <img width="568" alt="image" src="https://user-images.githubusercontent.com/60339514/126883739-089cd32e-9daf-4b0f-a00e-6e1fcb2a5e41.png">
