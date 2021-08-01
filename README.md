@@ -17,8 +17,9 @@ because we are using deep learning we included  jupyter notebooks that have cach
    * logisticRegression.ipynb
    * KNN.ipynb 
 2) There is a file called main.py. This file trains all of the models and fit them based on the hyperparameters that we found running the model files.
-> please note that main.py is the main file for this projects because it assembles different models to get the final prediction.
+
 ## How to run 
+
 1) first change to src folder 
 > cd src
 2) First run data_preprocess.py
@@ -27,8 +28,6 @@ because we are using deep learning we included  jupyter notebooks that have cach
 > python3 main.py 
 4) to run the model files seperately you can run 
 > python3 neural_network.py
-
-> python3 KNN.py 
 
 > python3 decisionTree.py   
 
