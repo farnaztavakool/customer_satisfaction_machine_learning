@@ -7,6 +7,7 @@ from sklearn.model_selection import KFold, train_test_split
 from data_preprocess import consistent_sampling
 import data_preprocess as pp
 
+
 def find_best_k_value():
     df_train_x = pp.loadData('X_train.csv')
     y_train = np.ravel(pp.loadData('Y_train.csv'))
@@ -35,6 +36,7 @@ def find_best_k_value():
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
     plt.savefig('images/knn_best_k.png', bbox_inches='tight')
+    
 
 def train_KNN_model():
     df_train_x = pp.loadData('X_train.csv')
@@ -51,6 +53,7 @@ def train_KNN_model():
     
     # save the model
     joblib.dump(knn, 'model_KNN.joblib')
+    
     
 def K_value_tuning(X_validation, Y_validation):
     X_validation = X_validation.to_numpy()
