@@ -10,13 +10,18 @@ because we are using deep learning we included  jupyter notebooks that have cach
 1) There are seperate files for each model which are called: neural_network.py, KNN.py, decisionTree.py, logisticRegression.py and each one of these files have a jupyter notebook.
 2) There is a file called main.py. This file trains all of the models and fit them based on the hyperparameters that we found running the model files.
 3) Finally, run.py is the file ...
+4) 
 ## How to run 
-
-1) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
-2) You can type 'python3 run.py <file> <function> <parameter_1> <parameter_2>' in terminal to run code seperately.
-3) Type 'python3 run.py' will show the Usage
-4) In general, type 'python3 run.py main' to run everything
-5) Plots are stored under 'src/images' if after running with run.py
+After installing the dependencies:
+1) run data_preprocess.py file by running: python3 data_preprocess.py
+2) run main.py
+3) To run each of the files seperately you can run:
+4) 
+5) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
+6) You can type 'python3 run.py <file> <function> <parameter_1> <parameter_2>' in terminal to run code seperately.
+7) Type 'python3 run.py' will show the Usage
+8) In general, type 'python3 run.py main' to run everything
+9) Plots are stored under 'src/images' if after running with run.py
 
 
 
@@ -55,27 +60,6 @@ because we are using deep learning we included  jupyter notebooks that have cach
             We need to decide how many features to keep in order to get a good prediction.
 
 
-## KNN model:
-    Score for submission: 0.65 n_neighbor = 5
-    The training for KNN model is really slow, have no idead why.
-
-    Since the data is highly unbalance (around 96% of the target is 0 and 4% of the target is 1). If we use a large k value for our KNN model, every sample will be predicted as 0 since 
-    we have a really large propotion of 0s. And also this will not decrease our accuracy since even though we output every target as 0, we will still get a high accuracy around 96%.
 
 
 
-## decision Tree model:
-    Score for submission: 0.71 (depth = 20)
-
-## Logistic Regression model:
-    Score for submission: 0.793
-
-## A combination of KNN and decision Tree model:
-    Score for submission: 0.749
-
-
-## A combination of KNN, decision Tree and neural network model:
-    Score for submission: 0.786
-
-## model analysis:
-    roc_auc_score
