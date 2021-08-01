@@ -16,7 +16,7 @@ def find_best_k_value():
    
     X_train = X_train.to_numpy()
     score_list = []
-    n_neighbors_grid = range(200, 1001, 200)
+    n_neighbors_grid = range(20, 1001, 20)
     kfold = KFold(n_splits=5)
     for i in n_neighbors_grid:
         score = 0
@@ -34,7 +34,7 @@ def find_best_k_value():
     plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
-    plt.show()
+    plt.savefig('images/knn_best_k.png', bbox_inches='tight')
 
 def train_KNN_model():
     df_train_x = pp.loadData('X_train.csv')
@@ -73,4 +73,4 @@ def K_value_tuning(X_validation, Y_validation):
     plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
-    plt.show()
+    plt.savefig('images/knn_k_turning.png', bbox_inches='tight')
