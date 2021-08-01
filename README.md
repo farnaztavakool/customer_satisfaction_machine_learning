@@ -36,10 +36,13 @@ because we are using deep learning we included  jupyter notebooks that have cach
 
 1) First change to src folder and
 > cd src 
+
 2) Then run data_preprocess.py
 > python3 data_preprocess.py
+
 3) Use the following command to run the main file
 > python3 run.py main
+
 4) To run the models seperately via commands:
 * For KNN model:
 *   > python3 run.py knn find_best_k_value
@@ -62,17 +65,3 @@ because we are using deep learning we included  jupyter notebooks that have cach
 * Note: 
 * > python3 run.py     (Displays the usage options above)
 * > python3 run.py knn    (Displays the usage options for knn only)
-
-## How to run after installing the dependencies (original method)
-
-1) first change to src folder 
-> cd src
-2) run data_preprocess.py
-> python3 data_preprocess.py  
-3) run main.py
-> python3 run.py main 
-
-
-
-
-
