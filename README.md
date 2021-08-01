@@ -5,7 +5,7 @@ Our project was chosen from a Kaggle competition: https://www.kaggle.com/c/santa
 
 Our aim for this project is to build a set of models to classify whether a customer is satisfied or dissatisfied with Santander Bank. 
 
-# Files provided by the Challenge
+## Files provided by the Challenge
 
 We were provided with a train.csv and test.csv data file. 
 
