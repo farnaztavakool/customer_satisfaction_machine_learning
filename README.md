@@ -1,11 +1,14 @@
 # customer_satisfaction_machine_learning
+# Dependencies
+1)Python3 and pip3 are required to run the code
+2) Install the dependencies by typing 'pip3 install -r requirements.txt'
 ## How to run 
-1) Install the dependencies by typing 'pip3 install -r requirements.txt'
-2) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
-3) You can type 'python3 run.py <file> <function> <parameter_1> <parameter_2>' in terminal to run code seperately.
-4) Type 'python3 run.py' will show the Usage
-5) In general, type 'python3 run.py main' to run everything
-6) Plots are stored under 'src/images' if after running with run.py
+
+1) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
+2) You can type 'python3 run.py <file> <function> <parameter_1> <parameter_2>' in terminal to run code seperately.
+3) Type 'python3 run.py' will show the Usage
+4) In general, type 'python3 run.py main' to run everything
+5) Plots are stored under 'src/images' if after running with run.py
 
 ## current outuput
 <img width="568" alt="image" src="https://user-images.githubusercontent.com/60339514/126883739-089cd32e-9daf-4b0f-a00e-6e1fcb2a5e41.png">
