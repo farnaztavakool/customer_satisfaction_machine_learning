@@ -134,5 +134,5 @@ def c_value_tuning(X_validation, Y_validation):
     plt.title('ROC score 5-fold CV')
     plt.xlabel('c value')
     plt.ylabel('ROC score')
-    plt.show()
+    plt.savefig('images/regression_turn.png', bbox_inches='tight')
 
