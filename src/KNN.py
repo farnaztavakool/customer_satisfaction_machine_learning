@@ -8,26 +8,15 @@ from sklearn.model_selection import KFold, train_test_split
 # from sklearn.model_selection import train_test_split
 from data_preprocess import consistent_sampling
 # undersampling_dataset, 
-import customer_satisfaction as cs
+import data_preprocess as pp
 
 def find_best_k_value():
-    df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(cs.loadData('Y_train.csv'))
-    df_test = cs.loadData('X_test.csv')
-    
-    # split train data into two separate sets
-    # one for training and the other one for testing
+    df_train_x = pp.loadData('X_train.csv')
+    y_train = np.ravel(pp.loadData('Y_train.csv'))
+    df_test = pp.loadData('X_test.csv')
+
     X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.8)
-    # df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
-    # X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
-    
-    # # undersample the data
-    # X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    # undersampled_train = undersampling_dataset(X_train)
-    # X_train = undersampled_train.drop(['TARGET'], axis=1)
-    # Y_train = undersampled_train['TARGET']
-
-
+   
     X_train = X_train.to_numpy()
     score_list = []
     n_neighbors_grid = range(200, 1001, 200)
@@ -51,14 +40,14 @@ def find_best_k_value():
     plt.show()
 
 def train_KNN_model():
-    df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(cs.loadData('Y_train.csv'))
-    df_test = cs.loadData('X_test.csv')
+    df_train_x = pp.loadData('X_train.csv')
+    y_train = np.ravel(pp.loadData('Y_train.csv'))
+    df_test = pp.loadData('X_test.csv')
     
     knn = KNeighborsClassifier(n_neighbors=250, weights='distance')
     knn.fit(df_train_x, y_train)
     
-    submission = cs.loadData('sample_submission.csv')
+    submission = pp.loadData('sample_submission.csv')
     target = knn.predict_proba(df_test)
     submission['TARGET'] = target[:,1]
     submission.to_csv('submission_KNN.csv', index=False)
