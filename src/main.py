@@ -157,15 +157,6 @@ def main():
     ## ---------------------------------------------------------------- split data -----------------------------------
 
     # split data into train set, validation set and test set as 2:1:1
-    '''
-    df_train_x.insert(df_train_x.shape[1], 'TARGET', df_train_y)
-    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
-
-    X_test.insert(X_test.shape[1], 'TARGET', Y_test)
-    X_validation, X_test, Y_validation, Y_test = consistent_sampling(X_test)
-
-    print(Y_validation)
-    '''
     X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, df_train_y, test_size = 0.5)
 
     X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size = 0.5)
@@ -197,7 +188,7 @@ def main():
     nn = build_model(X_train.shape[1], 167,0.001,0.0)
     nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
     ## --------------------------------------------------------------- model analysis -----------------------------------
-    '''
+    
     evaluate_model(knn, X_test, Y_test, 'knn')
 
     evaluate_model(dt, X_test, Y_test, 'decision tree')
@@ -205,7 +196,7 @@ def main():
     evaluate_model(lgr, X_test, Y_test, 'logistic regression')
 
     evaluate_model(nn, X_test, Y_test, 'Neural Network')
-    '''
+    
     ## --------------------------------------------------------------- assemble models -----------------------------------
 
     knn_prediction = knn.predict_proba(df_test)[:,1]

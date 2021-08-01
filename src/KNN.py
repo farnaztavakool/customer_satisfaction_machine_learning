@@ -55,7 +55,7 @@ def train_KNN_model():
     y_train = np.ravel(cs.loadData('Y_train.csv'))
     df_test = cs.loadData('X_test.csv')
     
-    knn = KNeighborsClassifier(n_neighbors=5)
+    knn = KNeighborsClassifier(n_neighbors=250, weights='distance')
     knn.fit(df_train_x, y_train)
     
     submission = cs.loadData('sample_submission.csv')

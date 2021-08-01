@@ -20,7 +20,7 @@ def train_lgr_model():
     df_test = loadData('X_test.csv')
     
     # fit the data into the model
-    lgr = LogisticRegression(C=0.5, class_weight='balanced', solver='liblinear')
+    lgr = LogisticRegression(C=0.05, class_weight='balanced', solver='liblinear')
     lgr.fit(df_train_x, y_train)
     
     submission = loadData('sample_submission.csv')

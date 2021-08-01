@@ -58,8 +58,6 @@ if __name__ == "__main__":
                 decisionTree.train_decisionTree_model()
             elif sys.argv[2] == 'find_best_depth':
                 decisionTree.find_best_depth()
-            elif sys.argv[2] == 'test_decisionTree':
-                decisionTree.test_decisionTree()
             elif sys.argv[2] == 'depth_tuning':
                 if len(sys.argv) > 4:
                     decisionTree.depth_tuning(sys.argv[3], sys.argv[4])

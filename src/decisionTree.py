@@ -19,7 +19,7 @@ def train_decisionTree_model():
     df_test = loadData('X_test.csv')
     
     # fit the data into the model
-    decisionTree = DecisionTreeClassifier(max_depth=7)
+    decisionTree = DecisionTreeClassifier(max_depth=5, class_weight='balanced', criterion='entropy')
     decisionTree.fit(df_train_x, y_train)
     
     submission = loadData('sample_submission.csv')
@@ -41,18 +41,6 @@ def find_best_depth():
     # one for training and the other one for testing
     # X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
 
-    # oversample the data
-    '''
-    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    oversampled_train = oversampling_dataset(X_train)
-    X_train = oversampled_train.drop(['TARGET'], axis=1)
-    Y_train = oversampled_train['TARGET']
-    
-    X_test.insert(X_test.shape[1], 'TARGET', Y_test)
-    oversampled_test = oversampling_dataset(X_test)
-    X_test = oversampled_test.drop(['TARGET'], axis=1)
-    Y_test = oversampled_test['TARGET']
-    '''
     #loss_list = []
     score_list=[]
     
@@ -102,44 +90,6 @@ def find_best_depth():
     plt.savefig('images/tree_entropy.png', bbox_inches='tight')
     return
 
-
-
-def test_decisionTree():
-    # read the data
-    df_train_x = loadData('X_train.csv')
-    y_train = np.ravel(loadData('Y_train.csv'))
-    df_test = loadData('X_test.csv')
-    
-    # split train data into two separate sets
-    # one for training and the other one for testing
-    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.3)
-    
-    # oversample the data
-    X_train.insert(X_train.shape[1], 'TARGET', Y_train)
-    oversampled_train = oversampling_dataset(X_train)
-    X_train = oversampled_train.drop(['TARGET'], axis=1)
-    Y_train = oversampled_train['TARGET']
-    
-    # fit the data into the model
-    decisionTree = DecisionTreeClassifier(max_depth=20)
-    decisionTree.fit(X_train, Y_train)
-    
-    prediction = decisionTree.predict_proba(X_test)[:,1]
-    false_positive_rate, true_positive_rate, threshold1 = roc_curve(Y_test, prediction)
-    print('roc_auc_score for DecisionTree: ', roc_auc_score(Y_test, prediction))
-    
-    plt.title('ROC - DecisionTree')
-    plt.plot(false_positive_rate, true_positive_rate)
-    plt.plot([0, 1], ls="--")
-    plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
-    plt.ylabel('True Positive Rate')
-    plt.xlabel('False Positive Rate')
-    plt.savefig('images/tree_test.png', bbox_inches='tight')
-    
-    plot_confusion_matrix(decisionTree, X_test, Y_test)
-    plt.savefig('images/tree_confusionMatrix.png', bbox_inches='tight')
-    
-    return
 
 def depth_tuning(X_validation, Y_validation):
     X_validation = X_validation.to_numpy()
