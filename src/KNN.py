@@ -34,7 +34,7 @@ def find_best_k_value():
     plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
-    plt.show()
+    plt.savefig('images/knn_best_k.png', bbox_inches='tight')
 
 def train_KNN_model():
     df_train_x = pp.loadData('X_train.csv')
@@ -73,4 +73,4 @@ def K_value_tuning(X_validation, Y_validation):
     plt.title('roc_auc_score with 5-fold CV')
     plt.xlabel('number of neighbors')
     plt.ylabel('score')
-    plt.show()
+    plt.savefig('images/knn_k_turning.png', bbox_inches='tight')
