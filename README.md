@@ -1,4 +1,3 @@
-# customer_satisfaction_machine_learning
 
 # Customer Satisfaction Model for Santander Bank
 
