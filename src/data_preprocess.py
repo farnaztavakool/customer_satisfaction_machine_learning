@@ -1,43 +1,81 @@
-from sklearn.tree import DecisionTreeClassifier
-import customer_satisfaction as cs
 import pandas as pd
-from sklearn.utils import resample
-import math
-from sklearn.model_selection import train_test_split, KFold
-from sklearn.metrics import plot_confusion_matrix, roc_auc_score, roc_curve
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression
-import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, VarianceThreshold
+from sklearn.tree import DecisionTreeClassifier
+from feature_engine.selection import DropCorrelatedFeatures
+
+
+def loadData(path):
+    return pd.DataFrame(pd.read_csv(path))
+
+def dropDuplicatedRowAndColumn(train, test):   
+    train = train.drop_duplicates()
+    drop = train.columns.duplicated()
+    return [train.loc[:,~drop], test.loc[:,~drop[:len(drop)-1]]]
+
+def quasiConstantRemoval(train, threshold, test):
+    constant_filter = VarianceThreshold(threshold= threshold)
+    constant_filter.fit(train)
+    return [pd.DataFrame(constant_filter.transform(train)),pd.DataFrame(constant_filter.transform(test))]
+
+def dropCorrelatedFeatures(train,test):
+    drop_correlated = DropCorrelatedFeatures(
+    variables=None, method='pearson', threshold=0.9)
+    drop_correlated.fit(train)
+    return [pd.DataFrame(drop_correlated.transform(train)),pd.DataFrame(drop_correlated.transform(test))]
+
+def featureSelectionANOVA(train_X, train_Y, test, numOfFeatures):
+    fvalue_best = SelectKBest(f_classif, k=numOfFeatures)
+    fvalue_best.fit(train_X, train_Y)
+    return [pd.DataFrame(fvalue_best.transform(train_X)),pd.DataFrame(fvalue_best.transform(test))]
+    
+def featureSelectionRFE(train_X, train_Y, test, numOfFeatures, estimator):
+    rfe = RFE(estimator = estimator, n_features_to_select=numOfFeatures)
+    rfe.fit(train_X, train_Y)
+    return [pd.DataFrame(rfe.transform(train_X)),pd.DataFrame(rfe.transform(test))]
+
+def featureSelectionCHI2(train_X, train_Y, test, numOfFeatures):
+    new_best = SelectKBest(chi2, k=numOfFeatures)
+    new_best.fit(train_X, train_Y)
+    return [pd.DataFrame(new_best.transform(train_X)),pd.DataFrame(new_best.transform(test))]
+
+def dropColumnWithName(data, name):
+    column_to_drop = [c for c in data if c.startswith(name)]
+    data = data.drop(columns = column_to_drop )
+
+def normalise(data):
+    scaler = StandardScaler()
+    return pd.DataFrame(scaler.fit_transform(data))
 
 def preprocessData(df_train, df_test):
 
-    dup = cs.dropDuplicatedRowAndColumn(df_train, df_test)
+    dup = dropDuplicatedRowAndColumn(df_train, df_test)
     df_train = dup[0]
     df_test = dup[1]
 
     y_train = df_train['TARGET'].copy()
     df_train_x = df_train.drop(columns="TARGET")
 
-    quasi_res = cs.quasiConstantRemoval(df_train_x, 0.01, df_test)
+    quasi_res = quasiConstantRemoval(df_train_x, 0.01, df_test)
     df_train_x = quasi_res[0]
     df_test = quasi_res[1]
 
-    correlated  = cs.dropCorrelatedFeatures(df_train_x,df_test)
+    correlated  = dropCorrelatedFeatures(df_train_x,df_test)
     df_train_x = correlated[0]
     df_test = correlated[1]
 
     # use ANOVA to select k best features, the number of features is a hyperparameter which we need to test to find a best one
     num_features_ANOVA = 100
-    df_train_x, df_test = cs.featureSelectionANOVA(df_train_x, y_train, df_test, num_features_ANOVA)
+    df_train_x, df_test = featureSelectionANOVA(df_train_x, y_train, df_test, num_features_ANOVA)
 
     # use decisionTreeClassifier for the estimator of RFE to fun the feature selection
     estimator = DecisionTreeClassifier()
     num_features_RFE = 70
-    df_train_x, df_test = cs.featureSelectionRFE(df_train_x, y_train, df_test, num_features_RFE, estimator)
+    df_train_x, df_test = featureSelectionRFE(df_train_x, y_train, df_test, num_features_RFE, estimator)
 
 
-    df_train_x = cs.normalise(df_train_x)
-    df_test = cs.normalise(df_test)
+    df_train_x = normalise(df_train_x)
+    df_test = normalise(df_test)
     
     df_train_x.to_csv('X_train.csv', index= False)
     y_train.to_csv('Y_train.csv', index= False)
@@ -45,65 +83,12 @@ def preprocessData(df_train, df_test):
 
     return [df_train_x, y_train, df_test]
 
+df_train = pd.read_csv("train.csv")
+df_test = pd.read_csv("test.csv")
+preprocessData(df_train, df_test)
 
-def oversampling_dataset(data):
-    count_majority, count_minority = data['TARGET'].value_counts()
-    
-    data_majority=data[data.TARGET==0] 
-    data_minority=data[data.TARGET==1]  
-
-    data_minority_over = data_minority.sample(count_majority, replace=True)
-    data_oversampled=pd.concat([data_minority_over,data_majority])
-
-    print(data_oversampled['TARGET'].value_counts())
-    return data_oversampled
-
-def undersampling_dataset(data):
-    count_majority, count_minority = data['TARGET'].value_counts()
-    
-    data_majority=data[data.TARGET==0]
-    data_minority=data[data.TARGET==1]
-
-    data_majority_under = data_majority.sample(count_minority)
-    data_underampled=pd.concat([data_majority_under,data_minority])
-
-    print(data_underampled['TARGET'].value_counts())
-    return data_underampled
-
-'''
-1) getting half of unsatisfied
-2) getting half of satisfied 
-3) concatenating them to have a representative sample
-'''
-def consistent_sampling(data):
-    
-    count_majority, count_minority = data['TARGET'].value_counts()
-    data_majority=data[data.TARGET==0] 
-    data_minority=data[data.TARGET==1] 
-
- 
-    x_train_majority, x_test_majority, y_train_majority, y_test_majority = train_test_split(data_majority.drop(['TARGET'],axis=1), data_majority['TARGET'],train_size=math.floor(count_majority/2))
-    x_train_minority, x_test_minority, y_train_minority, y_test_minority = train_test_split(data_minority.drop(['TARGET'],axis=1), data_minority['TARGET'],train_size=math.floor(count_minority/2))
-    
-
-    size = math.floor(count_majority/2) + math.floor(count_minority/2)
-    x_test = pd.concat([x_test_majority, x_test_minority], axis=0).reset_index(drop=True)
-    x_train = pd.concat([x_train_majority, x_train_minority], axis=0)
-    y_train = pd.concat([y_train_majority, y_train_minority], axis=0).to_numpy()
-    y_test = pd.concat([y_test_majority, y_test_minority], axis=0).to_numpy()
-   
-  
-    return x_train, x_test, y_train, y_test
+                      
 
 
-def main():
-    df_train = cs.loadData("train.csv")
-    df_test = cs.loadData("test.csv")
-
-    # dropping "ID" from both training and test data
-    ID_train = df_train["ID"].copy()
-    ID_test = df_test["ID"].copy()
-    df_train = df_train.drop(columns = "ID")
-    df_test = df_test.drop(columns = "ID")
 
 

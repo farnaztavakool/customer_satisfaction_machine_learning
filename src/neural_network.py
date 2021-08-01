@@ -1,17 +1,16 @@
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, GridSearchCV
-import customer_satisfaction as cs
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import LearningRateScheduler
 from sklearn.metrics import roc_auc_score, roc_curve
-from data_preprocess import consistent_sampling
+import data_preprocess as pp
 from keras.optimizers import Adam
-from keras.layers import Dropout
+import data_preprocess as pp
 
 # These variales will be set during modelling
 output_dim_const = 0
@@ -24,15 +23,14 @@ dropout_const = 0
 
 def main():
   
-    df_train_x = cs.loadData('X_train.csv')
-    y_train = np.ravel(cs.loadData('Y_train.csv'))
-    df_test = cs.loadData('X_test.csv')
+    df_train_x = pp.loadData('X_train.csv')
+    y_train = np.ravel(pp.loadData('Y_train.csv'))
+    df_test = pp.loadData('X_test.csv')
     
     print("Sampling the data for NN")
-    df_train_x.insert(df_train_x.shape[1], 'TARGET', y_train)
-    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
   
-    df_train_x = df_train_x.drop(['TARGET'], axis=1)
+    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, y_train, test_size = 0.8)
+
   
     print("Finding number of neurons for NN")
     global_var = globals()
@@ -120,11 +118,18 @@ def get_CV_prediction(x, y, best_params, test_data, output_dim):
     kfold = KFold(n_splits=10)
     
     for train, test in kfold.split(x, y):
-        model.fit(x[train],y[train],epochs=epoch_const,batch_size=batch_size_const)
+        history = model.fit(x[train],y[train],epochs=epoch_const,batch_size=batch_size_const)
         prediction +=model.predict(test_data)[:,0]
         
     prediction = prediction/11
+    plt.plot(history.history['loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.show()
     return prediction
 
+# get the number of nurons
 def getNumberOfNeurons(observation_size,alpha, input_size ):
     return math.floor(observation_size/(alpha*(input_size+1)))
+main()
