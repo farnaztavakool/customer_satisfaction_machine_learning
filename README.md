@@ -2,6 +2,14 @@
 # Dependencies
 1) Python3 and pip3 are required to run the code.
 2) Install the dependencies by typing 'pip3 install -r requirements.txt'.
+
+## Jupyter notebooks
+because we are using deep learning we included  jupyter notebooks that have cached results for Neural Network, KNN, Logistic regression, DecisionTree and the main jupyter notebook that essemble different models.
+
+## What are the different files and what they do
+1) There are seperate files for each model which are called: neural_network.py, KNN.py, decisionTree.py, logisticRegression.py and each one of these files have a jupyter notebook.
+2) There is a file called main.py. This file trains all of the models and fit them based on the hyperparameters that we found running the model files.
+3) Finally, run.py is the file ...
 ## How to run 
 
 1) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
