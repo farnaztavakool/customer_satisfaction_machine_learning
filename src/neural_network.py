@@ -3,14 +3,14 @@ from keras.layers import Dense, Dropout
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold, GridSearchCV
+from sklearn.model_selection import KFold, GridSearchCV,train_test_split
 import math
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import LearningRateScheduler
 from sklearn.metrics import roc_auc_score, roc_curve
 import data_preprocess as pp
 from keras.optimizers import Adam
-import data_preprocess as pp
+
 
 # These variales will be set during modelling
 output_dim_const = 0
@@ -84,7 +84,7 @@ def build_model(input_dim, output_dim,learn_rate=0.01,dropout_rate=0.0):
 def find_best_output_size(x_train, y_train, x_test, y_test):
    
     x_train = x_train.to_numpy()
-    scores = [0] * 5
+    scores = [0] * 10
     alpha_list = [i+1 for i in range(10)]
     kfold = KFold(n_splits=5)
     for alpha in alpha_list:
