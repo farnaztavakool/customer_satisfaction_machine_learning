@@ -106,120 +106,121 @@ def evaluate_model(model, X_test, Y_test, model_name):
     plt.plot([0, 0], [1, 0] , c=".7"), plt.plot([1, 1] , c=".7")
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
-    plt.show()
+    plt.savefig('images/evaluate_model_score.png', bbox_inches='tight')
     if(model_name != 'Neural Network'):
         plot_confusion_matrix(model, X_test, Y_test)
-        plt.show()
+        plt.savefig('images/evaluate_model_confusionMatrix.png', bbox_inches='tight')
 
-## --------------------------------------------------------------load data-------------------------------------------
-df_train = loadData("train.csv")
-df_test = loadData("test.csv")
+def main():
+    ## --------------------------------------------------------------load data-------------------------------------------
+    df_train = loadData("train.csv")
+    df_test = loadData("test.csv")
 
-# dropping "ID" from both training and test data
-ID_train = df_train["ID"].copy()
-ID_test = df_test["ID"].copy()
-df_train = df_train.drop(columns = "ID")
-df_test = df_test.drop(columns = "ID")
+    # dropping "ID" from both training and test data
+    ID_train = df_train["ID"].copy()
+    ID_test = df_test["ID"].copy()
+    df_train = df_train.drop(columns = "ID")
+    df_test = df_test.drop(columns = "ID")
 
-dup = dropDuplicatedRowAndColumn(df_train, df_test)
-df_train = dup[0]
-df_test = dup[1]
+    dup = dropDuplicatedRowAndColumn(df_train, df_test)
+    df_train = dup[0]
+    df_test = dup[1]
 
-df_train_y = df_train['TARGET'].copy()
-df_train_x = df_train.drop(columns="TARGET")
-
-
-
-## --------------------------------------------------------------data preprocess---------------------------------
-quasi_res = quasiConstantRemoval(df_train_x, 0.01, df_test)
-df_train_x = quasi_res[0]
-df_test = quasi_res[1]
-
-correlated  = dropCorrelatedFeatures(df_train_x,df_test)
-df_train_x = correlated[0]
-df_test = correlated[1]
-
-## ---------------------------------------------------------------feature selection------------------------------
-# use ANOVA to select k best features
-num_features_ANOVA = 100
-df_train_x, df_test = featureSelectionANOVA(df_train_x, df_train_y, df_test, num_features_ANOVA)
-
-# use decisionTreeClassifier for the estimator of RFE to fun the feature selection
-estimator = DecisionTreeClassifier()
-num_features_RFE = 70
-df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, num_features_RFE, estimator)
-
-df_train_x = normalise(df_train_x)
-df_train_y = np.ravel(df_train_y)
-df_test = normalise(df_test)
-
-## ---------------------------------------------------------------- split data -----------------------------------
-
-# split data into train set, validation set and test set as 2:1:1
-'''
-df_train_x.insert(df_train_x.shape[1], 'TARGET', df_train_y)
-X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
-
-X_test.insert(X_test.shape[1], 'TARGET', Y_test)
-X_validation, X_test, Y_validation, Y_test = consistent_sampling(X_test)
-
-print(Y_validation)
-'''
-X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, df_train_y, test_size = 0.5)
-
-X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size = 0.5)
-
-## ---------------------------------------------------------------- hypeparameter tuning -------------------------
-'''
-KNN.K_value_tuning(X_val, Y_val)
-decisionTree.depth_tuning(X_val, Y_val)
-logisticRegression.c_value_tuning(X_val, Y_val)
-'''
-## --------------------------------------------------------------- Train models -----------------------------------
-
-# KNN model
-knn = KNeighborsClassifier(n_neighbors=250, weights='distance')
-knn.fit(X_train, Y_train)
+    df_train_y = df_train['TARGET'].copy()
+    df_train_x = df_train.drop(columns="TARGET")
 
 
-# decision tree model
-dt = DecisionTreeClassifier(max_depth=5, class_weight='balanced', criterion='entropy')
-dt.fit(X_train, Y_train)
+
+    ## --------------------------------------------------------------data preprocess---------------------------------
+    quasi_res = quasiConstantRemoval(df_train_x, 0.01, df_test)
+    df_train_x = quasi_res[0]
+    df_test = quasi_res[1]
+
+    correlated  = dropCorrelatedFeatures(df_train_x,df_test)
+    df_train_x = correlated[0]
+    df_test = correlated[1]
+
+    ## ---------------------------------------------------------------feature selection------------------------------
+    # use ANOVA to select k best features
+    num_features_ANOVA = 100
+    df_train_x, df_test = featureSelectionANOVA(df_train_x, df_train_y, df_test, num_features_ANOVA)
+
+    # use decisionTreeClassifier for the estimator of RFE to fun the feature selection
+    estimator = DecisionTreeClassifier()
+    num_features_RFE = 70
+    df_train_x, df_test = featureSelectionRFE(df_train_x, df_train_y, df_test, num_features_RFE, estimator)
+
+    df_train_x = normalise(df_train_x)
+    df_train_y = np.ravel(df_train_y)
+    df_test = normalise(df_test)
+
+    ## ---------------------------------------------------------------- split data -----------------------------------
+
+    # split data into train set, validation set and test set as 2:1:1
+    '''
+    df_train_x.insert(df_train_x.shape[1], 'TARGET', df_train_y)
+    X_train, X_test, Y_train, Y_test = consistent_sampling(df_train_x)
+
+    X_test.insert(X_test.shape[1], 'TARGET', Y_test)
+    X_validation, X_test, Y_validation, Y_test = consistent_sampling(X_test)
+
+    print(Y_validation)
+    '''
+    X_train, X_test, Y_train, Y_test = train_test_split(df_train_x, df_train_y, test_size = 0.5)
+
+    X_val, X_test, Y_val, Y_test = train_test_split(X_test, Y_test, test_size = 0.5)
+
+    ## ---------------------------------------------------------------- hypeparameter tuning -------------------------
+    '''
+    KNN.K_value_tuning(X_val, Y_val)
+    decisionTree.depth_tuning(X_val, Y_val)
+    logisticRegression.c_value_tuning(X_val, Y_val)
+    '''
+    ## --------------------------------------------------------------- Train models -----------------------------------
+
+    # KNN model
+    knn = KNeighborsClassifier(n_neighbors=250, weights='distance')
+    knn.fit(X_train, Y_train)
 
 
-# logistic regression model
-lgr = LogisticRegression(C=0.05, class_weight='balanced', solver='liblinear')
-lgr.fit(X_train, Y_train)
+    # decision tree model
+    dt = DecisionTreeClassifier(max_depth=5, class_weight='balanced', criterion='entropy')
+    dt.fit(X_train, Y_train)
 
 
-# neural network model
-nn = build_model(X_train.shape[1], 167,0.001,0.0)
-nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
-## --------------------------------------------------------------- model analysis -----------------------------------
-'''
-evaluate_model(knn, X_test, Y_test, 'knn')
-
-evaluate_model(dt, X_test, Y_test, 'decision tree')
-
-evaluate_model(lgr, X_test, Y_test, 'logistic regression')
-
-evaluate_model(nn, X_test, Y_test, 'Neural Network')
-'''
-## --------------------------------------------------------------- assemble models -----------------------------------
-
-knn_prediction = knn.predict_proba(df_test)[:,1]
-
-dt_prediction = dt.predict_proba(df_test)[:,1]
-
-lgr_prediction = lgr.predict_proba(df_test)[:,1]
-
-nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0},df_test,167)
-
-target = knn_prediction * 0.25 + dt_prediction * 0.25 + lgr_prediction * 0.25 + nn_prediction * 0.25
+    # logistic regression model
+    lgr = LogisticRegression(C=0.05, class_weight='balanced', solver='liblinear')
+    lgr.fit(X_train, Y_train)
 
 
-## --------------------------------------------------------------- Final result/ submission --------------------------
+    # neural network model
+    nn = build_model(X_train.shape[1], 167,0.001,0.0)
+    nn.fit(X_train, Y_train, epochs=20, batch_size=10000)
+    ## --------------------------------------------------------------- model analysis -----------------------------------
+    '''
+    evaluate_model(knn, X_test, Y_test, 'knn')
 
-submission = loadData('sample_submission.csv')
-submission['TARGET'] = target
-submission.to_csv('submission_final.csv', index=False)
+    evaluate_model(dt, X_test, Y_test, 'decision tree')
+
+    evaluate_model(lgr, X_test, Y_test, 'logistic regression')
+
+    evaluate_model(nn, X_test, Y_test, 'Neural Network')
+    '''
+    ## --------------------------------------------------------------- assemble models -----------------------------------
+
+    knn_prediction = knn.predict_proba(df_test)[:,1]
+
+    dt_prediction = dt.predict_proba(df_test)[:,1]
+
+    lgr_prediction = lgr.predict_proba(df_test)[:,1]
+
+    nn_prediction = get_CV_prediction(df_train_x,df_train_y,{"lr":0.001,"dropout_rate":0},df_test,167)
+
+    target = knn_prediction * 0.25 + dt_prediction * 0.25 + lgr_prediction * 0.25 + nn_prediction * 0.25
+
+
+    ## --------------------------------------------------------------- Final result/ submission --------------------------
+
+    submission = loadData('sample_submission.csv')
+    submission['TARGET'] = target
+    submission.to_csv('submission_final.csv', index=False)
