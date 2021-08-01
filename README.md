@@ -1,7 +1,7 @@
 # customer_satisfaction_machine_learning
 # Dependencies
-1)Python3 and pip3 are required to run the code
-2) Install the dependencies by typing 'pip3 install -r requirements.txt'
+1) Python3 and pip3 are required to run the code.
+2) Install the dependencies by typing 'pip3 install -r requirements.txt'.
 ## How to run 
 
 1) If there is keras import error, change the import 'keras' with 'tensorflow.keras' in every .py file.
